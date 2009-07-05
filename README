@@ -1,0 +1,99 @@
+For a high-level paradigm, we need to formulate a model specification
+paradigm.
+
+
+Lessons from lattice:
+
+ * Formulas and non-standard evaluation has drawbacks, especially for
+   non-top-level calls, wrappers, etc.  However, we do still need to
+   think about enclosing environments.
+
+ * A data-centric approach is good, but the data frame model is too
+   limited.  In other words, the design should anticipate other data
+   containers (we have a ready-made use-case in flowSets)
+
+ * Distinction between primary and conditioning variables is good, but
+   giving special status to 'x', 'y', etc. has drawbacks.  A simple
+   use-case is densityplot(x=, weights=)
+
+ * The ability to specify multiple data sources is useful (something
+   lattice cannot do well, but ggplot can).
+
+
+
+
+
+Ideas:
+
+ * Specify variables through expression-like objects, with eval-like
+   functionality, but make the tools explicitly generic to work with
+   non-standard data sources.  Think about attaching an enclosing
+   environment to these expression-like objects.
+
+ * Make the idea of packets concrete.  Perhaps a cross-tabulation-like
+   array, each element an index vector (subscripts, but potentially
+   more flexible).  A "packets" object should have an attached data
+   object (could be .GlobalEnv).  packet[[i]] should have enough
+   information to extract the corresponding packet from a different
+   packets object (with the same cross-tabulation)
+
+ * Variable evaluation API:
+
+     evaluate(expression, data, subset)
+     evaluate(expression, packet[[i]])
+
+
+ * High-level function calls could be of the form
+
+     qvplot(data = environment(), enclos = .GlobalEnv,
+            margin.vars = list(a = expression(a), b = expression(b)),
+            packets = packets(margin.vars, data),
+
+            panel.vars = list(x = expression(x), weights = expression(w)),  # specific to panel function
+            panel = qv.panel.densityplot,
+            prepanel = qv.panel.densityplot,
+
+            ...)
+
+
+
+ * One convenient convention is to make each panel function accept an
+   argument called 'give.limits', so that when called as
+
+     panel(..., give.limits = TRUE)
+
+   it essentially works as a prepanel function.
+
+
+
+ * Outline of steps and related functions
+
+
+    - compute.packets : computes packets as a list array 
+
+    - compute.layout : computes layout --> 
+        will need to match these to packet order; 
+	generates integer-array of dim c(column, row, page), with
+	packet number as entry (0 for no packet)
+
+    - compute.limits : call prepanel function for all packets --> 
+        generates similar list-array, for now of the form list(xlim, ylim)
+
+    - combine.limits : combine limits information across packets ->
+        (1) support types same, free, sliced
+	(2) allow choice of margins over which to combine 
+        --> results as a list-array again
+
+    - create.panels : create list-array of qwidgets, with structure
+	similar to layout
+
+    - create similar list-array of strip.[top|left],
+	xaxis.[left|right], yaxis.[top|bottom]
+
+    - render into page widgets, one for each page in layout[,,page]:
+	+ draw all panels
+	+ draw strip.top for row=1:nrow (just 1 for at top)
+	+ draw strip.left for column=integer(0) (just 1 for left)
+	+ etc. for axes
+
+

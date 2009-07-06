@@ -5,7 +5,6 @@ null.limits <- function()
          ylim = c(NA_real_, NA_real_))
 }
 
-
 default.limits <- function(x, y)
 {
     if (!any(is.finite(as.numeric(x)) & is.finite(as.numeric(y))))
@@ -25,10 +24,6 @@ default.limits <- function(x, y)
     }
     ans
 }
-
-
-
-
 
 ## FIXME: have prepanels use generalized 'range' function (for
 ## numeric, factors, time) when computing limits.
@@ -92,8 +87,6 @@ prepanel.mosaiq.densityplot <- function(..., give.limits)
     panel.mosaiq.densityplot(..., give.limits = TRUE)
 }
 
-
-
 mosaiq.superpose <-
     function(x, y = NULL, groups = NULL, type = "p", 
              ## subscripts, 
@@ -152,13 +145,19 @@ panel.mosaiq.xyplot <-
              data,
              enclos,
              give.limits = FALSE,
-             type = "p",
+             type = "p", grid = FALSE,
              ...,
              horizontal = FALSE)
 {
     x <- evaluate(panel.vars$x, data = data, subset = packet, enclos = enclos)
     y <- evaluate(panel.vars$y, data = data, subset = packet, enclos = enclos)
     if (give.limits) return(default.limits(x, y))
+    if (is.logical(grid))
+    {
+        grid <- if (grid) list(h = -5, v = -5) else list(h = 0, v = 0)
+    }
+    ## mosaiq.fill(col = "yellow", border = "green", ...)
+    mosaiq.grid(h = grid$h, v = grid$v, col = "grey", ...)
     groups <- evaluate(panel.vars$groups, data = data, subset = packet, enclos = enclos)
     if (missing(horizontal)) 
     {

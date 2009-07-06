@@ -11,27 +11,27 @@ library(mosaiq)
 
 
 mydata <-
-    data.frame(x = 1:100, y = rnorm(100),
-               g = gl(3, 1, 100),
-               a = gl(1, 100))
+    data.frame(x = 1:1000, y = rnorm(1000),
+               g = gl(3, 1, 1000, labels = month.name[1:3]),
+               a = gl(1, 1000))
 
 mosaiq.xyplot(y ~ x, data = mydata,
-              margin = ~a, groups = g)
+              margin = ~a, groups = g,
+              grid = TRUE)
 
 mosaiq.xyplot(y ~ x, data = mydata, groups = g,
               margin = ~g, layout = c(2, 2))
 
 mosaiq.xyplot(y ~ x, data = mydata)
 
-
-
 mosaiq.densityplot(~ y, data = mydata, groups = g, 
                    margin = ~a)
 
 mosaiq.densityplot(~ y, data = mydata, margin = ~g)
 
-mosaiq.qqmath(y, data = mydata, groups = g,
-              margin = ~a)
+mosaiq.histogram(~ y, data = mydata, margin = ~g + a)
+
+mosaiq.qqmath(y, data = mydata, groups = g, margin = ~a)
 
 
 

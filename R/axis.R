@@ -31,8 +31,7 @@ qxaxis <-
     view <- qplotView(scene = scene,
                       rescale = "geometry",
                       opengl = FALSE)
-    view$horizontalScrollBarPolicy <- 1
-    view$verticalScrollBarPolicy <- 1
+    view$focusPolicy <- 0
     qsetExpanding(view, vertical = FALSE, horizontal = TRUE)
     view
 }
@@ -76,8 +75,7 @@ qyaxis <-
     view <- qplotView(scene = scene,
                       rescale = "geometry",
                       opengl = FALSE)
-    view$horizontalScrollBarPolicy <- 1
-    view$verticalScrollBarPolicy <- 1
+    view$focusPolicy <- 0
     qsetExpanding(view, vertical = TRUE, horizontal = FALSE)
     ## qresize(view, w = 100, h = NULL)
     .MosaicEnv$axisview <- view

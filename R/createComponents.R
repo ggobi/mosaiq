@@ -28,7 +28,9 @@ create.panels <-
                                 limits = limits[[i]],
                                 data = data,
                                 enclos = enclos, ...,
-                                painter = painter)
+                                item = item,
+                                painter = painter,
+                                exposed = exposed)
                       }
                       ## FIXME: do we really need this hack?
                       assign("i", i, environment(paintFun))
@@ -39,6 +41,7 @@ create.panels <-
                       view <- qplotView(scene = scene,
                                         rescale = "geometry",
                                         opengl = FALSE)
+                      view$focusPolicy <- 0
                       ## qsetDragMode(view, "scroll")
                       qsetExpanding(view, vertical = TRUE, horizontal = TRUE)
                       .MosaicEnv$panelview <- view
@@ -78,6 +81,9 @@ create.strip.top <-
             for (w in which.margins)
             {
                 lab <- qlabel(as.character(margin.combs[i, w]))
+                lab$alignment <- 132 ## centers both h and v
+                ## lab$styleSheet <- " QLabel { background: #CCCCCC; } "
+                lab$styleSheet <- " QLabel { background: #CCCCCC; border: black; } "
                 ## bg = fill[w], border = col[w])
                 qaddWidgetToLayout(l, lab, nmargin + 1L - w, 1)
             }

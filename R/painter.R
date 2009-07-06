@@ -1,5 +1,22 @@
 
 
+mosaiq.text <-
+    function(x, y = NULL, labels = seq_along(x),
+             rot = 0, 
+             font = qfont(),
+             ...,
+             painter)
+{
+    qfont(painter) <- font
+    labels <- as.character(labels)
+    xy <- xy.coords(x, y, recycle = recycle)
+    labels <- rep(labels, length = length(xy[["x"]]))
+    stopifnot(length(labels) == length(xy[["x"]]))
+    qdrawText(painter,
+              labels, xy$x, xy$y,
+              rot = rot)
+}
+
 mosaiq.segments <-
     function(x0, y0, x1, y1, col = "black",
              ..., painter)
@@ -9,6 +26,109 @@ mosaiq.segments <-
 }
 
 
+mosaiq.loess <-
+    function(x, y, span = 2/3, degree = 1,
+             family = c("symmetric", "gaussian"),
+             evaluation = 50,
+             horizontal = FALSE,
+             ...,
+             painter)
+{
+    x <- as.numeric(x)
+    y <- as.numeric(y)
+    ok <- is.finite(x) & is.finite(y)
+    if (sum(ok) < 1) return()
+    if (horizontal)
+    {
+        smooth <-
+            loess.smooth(y[ok], x[ok], span = span, family = family,
+                         degree = degree, evaluation = evaluation)
+        mosaiq.points(x = smooth$y, y = smooth$x, type = "l", ...)
+    }
+    else
+    {
+        smooth <-
+            loess.smooth(x[ok], y[ok], span = span, family = family,
+                         degree = degree, evaluation = evaluation)
+        mosaiq.points(x = smooth$x, y = smooth$y, type = "l", ...)
+    }
+}
+
+mosaiq.abline <-
+    function(a = NULL, b = NULL,
+             h = NULL, v = NULL,
+             reg = NULL, coef = NULL,
+             ...,
+             item, painter, exposed)
+{
+    cl <- list(xlim = exposed[, 1],
+               ylim = exposed[, 2])
+    if (!is.null(h) || !is.null(v))
+    {
+        h <- unique(h)
+        v <- unique(v)
+        nh <- length(h)
+        nv <- length(v)
+        x0 <- c(numeric(0), rep(cl$xlim[1], nh), v)
+        x1 <- c(numeric(0), rep(cl$xlim[2], nh), v)
+        y0 <- c(numeric(0), h, rep(cl$ylim[1], nv))
+        y1 <- c(numeric(0), h, rep(cl$ylim[2], nv))
+        mosaiq.segments(x0, y0, x1, y1, ...,
+                        painter = painter)
+    }
+    if (!is.null(reg))
+    {
+        if (is.null(coef)) warning("'coef' overridden by 'reg'")
+        coef <- coef(reg)
+    }
+    if (!is.null(coef))
+    {
+        if (!(is.null(a) && is.null(b))) warning("'a' and 'b' overridden by 'coef'")
+        a <- coef[1]
+        b <- coef[2]
+    }
+    if (!is.null(a))
+    {
+        if (is.null(b))
+        {
+            if (length(a) == 2)
+            {
+                b <- a[2]
+                a <- a[1]
+            }
+            else stop("'a' must have length 2 if 'b' is NULL")
+        }
+        if (any(!is.finite(b))) stop("all elements of 'b' must be finite; use 'v' instead.")
+        fabline <- function(x) { a + b * x }
+        fbaline <- function(y) { (y - a) / b } ## b shouldn't be 0 then
+        y0 <- fabline(cl$xlim[1])
+        y1 <- fabline(cl$xlim[2])
+        if (any(c(y0,y1) < cl$ylim[1] |
+                c(y0,y1) > cl$ylim[2])) warning("FIXME: potential clipping issues")
+        if (FALSE) ## check b != 0, and what about lines completely outside?
+        {
+            x0 <- fbaline(cl$ylim[1])
+            x1 <- fbaline(cl$ylim[2])
+            ## do something with these
+        }
+        mosaiq.segments(cl$xlim[1], y0, cl$xlim[2], y1,
+                        ..., painter = painter)
+    }
+}
+
+
+mosaiq.lmline <- function(x, y, ...)
+{
+    if (length(x) > 1)
+    {
+        fm <- lm(as.numeric(y) ~ as.numeric(x))
+        mosaiq.abline(coef = coef(fm), ...)
+    }
+}
+
+
+
+
 
 
 ## low-level plotting functions written using the qtpaint painter API
@@ -16,7 +136,7 @@ mosaiq.segments <-
 mosaiq.points <-
     function(x, y = NULL, type = "p", jitter.x = FALSE, jitter.y = FALSE,
              factor = 0.5, amount = NULL, horizontal = FALSE,
-             cex = 1, col = "black", fill = "transparent", painter)
+             cex = 1, col = "black", fill = "transparent", ..., painter)
 {
     xy <- xy.coords(x, y, recycle = TRUE)
     x <- xy$x
@@ -42,12 +162,35 @@ mosaiq.points <-
             else
                 qdrawSegment(painter, x, y, x, 0, stroke = rgb.col)
         }
-        ##         if ("r" %in% type)
-        ##             qv.panel.lmline(x, y)
-        ##         if ("smooth" %in% type)
-        ##             qv.panel.loess(x, y, horizontal = horizontal)
+        if ("r" %in% type)
+            mosaiq.lmline(x, y, ...)
+        if ("smooth" %in% type)
+            mosaiq.loess(x, y, horizontal = horizontal, ...)
         ## if ("a" %in% type) qv.panel.average(x, y, horizontal = horizontal)
     }
+}
+
+
+
+mosaiq.grid <-
+    function(h = 3, v = 3, col = "grey", ...,
+             item, painter, exposed)
+{
+    cl <- list(xlim = exposed[, 1],
+               ylim = exposed[, 2])
+    h <- h[1]; v <- v[1]
+    if (h < 0)
+        mosaiq.abline(h = pretty(cl$ylim, n = -h),
+                      col = col, ..., item = item, painter = painter, exposed = exposed)
+    if (v < 0)
+        mosaiq.abline(v = pretty(cl$xlim, n = -h),
+                      col = col, ..., item = item, painter = painter, exposed = exposed)
+    if (h > 0)
+        mosaiq.abline(h = do.breaks(cl$ylim, h + 1)[-c(1, h + 2)],
+                      col = col, ..., item = item, painter = painter, exposed = exposed)
+    if (v > 0)
+        mosaiq.abline(v = do.breaks(cl$xlim, v + 1)[-c(1, v + 2)],
+                      col = col, ..., item = item, painter = painter, exposed = exposed)
 }
 
 
@@ -59,6 +202,7 @@ mosaiq.rect <-
              width = xright - xleft,
              height = ytop - ybottom,
              col = "black", fill = "transparent",
+             ...,
              painter)
 {
     xy <- xy.coords(x, y, recycle = TRUE)
@@ -88,7 +232,8 @@ mosaiq.bars <-
              theme = mosaiq.theme(),
              col = theme$polygon$col,
              fill = theme$polygon$fill,
-             col.ref = theme$reference$col)
+             col.ref = theme$reference$col,
+             item, painter, exposed)
 {
     if (is.null(groups)) groups <- gl(1, length(x))
     groups <- as.factor(groups)
@@ -96,7 +241,8 @@ mosaiq.bars <-
     nvals <- length(vals)
     col <- rep(col, length = nvals)
     fill <- rep(fill, length = nvals)
-    cpl <- qv.getScale()
+    cpl <- list(xlim = exposed[, 1],
+                ylim = exposed[, 2])
     origin <-
         if (stack) 0
         else if (horizontal)
@@ -221,4 +367,17 @@ mosaiq.bars <-
     }
 }
 
+
+
+mosaiq.fill <-
+    function(col = "grey", border = "black", ...,
+             item, painter, exposed)
+{
+    cl <- list(xlim = exposed[, 1],
+               ylim = exposed[, 2])
+    mosaiq.rect(cl$xlim[1], cl$ylim[1],
+                cl$xlim[2], cl$ylim[2],
+                col = border, fill = col,
+                painter = painter)
+}
 

@@ -134,8 +134,6 @@ mosaiq <-
                xaxis.bottom.widgets = xaxisBottomWidgets, xaxis.top.widgets = xaxisTopWidgets,
                yaxis.left.widgets = yaxisLeftWidgets, yaxis.right.widgets = yaxisRightWidgets,
                relation = relation, alternating = alternating)
-    ## FIXME: handle multiple pages by QStackedWidget eventually
-    if (length(pageWidgets) > 1) warning("Only showing first page")
 
     ## create 'full' widget with page and associated labels.
     ans <- qwidget()
@@ -147,13 +145,35 @@ mosaiq <-
 
     ## ans <- qvBasicWidget(canvas = theme$background$col, margin = ) # imagine a 9x9 layout
 
-    if (is(pageWidgets[[1]], "QWidget"))
+    if (length(pageWidgets) > 1) 
+    {
+        tabw <- qtabWidget()
+        for (i in seq_len(length(pageWidgets)))
+        {
+            if (is(pageWidgets[[i]], "QWidget"))
+                qaddTab(tabw, pageWidgets[[i]], label = sprintf("Page %g", i))
+        }
+        qaddWidgetToLayout(lans, tabw, 5, 5)
+    }
+    else if (is(pageWidgets[[1]], "QWidget"))
         qaddWidgetToLayout(lans, pageWidgets[[1]], 5, 5)
 
-##     if (!is.null(xlab)) ans[6, 5] <- qlabel(xlab, horizontal = TRUE)
-##     if (!is.null(ylab)) ans[5, 4] <- qlabel(ylab, horizontal = FALSE)
-##     if (!is.null(main)) ans[1, 1, 1, 9] <- qlabel(main, horizontal = TRUE)
-##     if (!is.null(sub)) ans[9, 1, 1, 9] <- qlabel(sub, horizontal = TRUE)
+    if (!is.null(xlab))
+        qaddWidgetToLayout(lans, 
+                           labelWidget(xlab, horizontal = TRUE),
+                           6, 5)
+    if (!is.null(ylab))
+        qaddWidgetToLayout(lans, 
+                           labelWidget(ylab, horizontal = FALSE),
+                           5, 4)
+    if (!is.null(main))
+        qaddWidgetToLayout(lans, 
+                           labelWidget(main, horizontal = TRUE),
+                           1, 1, 1, 9)
+    if (!is.null(sub)) 
+        qaddWidgetToLayout(lans, 
+                           labelWidget(sub, horizontal = TRUE),
+                           9, 1, 1, 9)
 ##     if (!is.null(legend)) 
 ##     {
 ##         for (space in names(legend))
@@ -188,7 +208,7 @@ print.mosaiq <- function(x, row = 1, col = 1, ...)
     if (is(x, "QWidget"))
         qaddWidgetToLayout(.MosaicEnv$toplayout, x, row, col)
     qupdate(.MosaicEnv$toplevel)
-    ## export.mosaiq()
+    export.mosaiq()
     invisible(x)
 }
 
@@ -204,7 +224,7 @@ export.mosaiq <- function(file = .MosaicEnv$file)
         Sys.sleep(0.2)
         outfile <- sprintf(file, .MosaicEnv$index)
         .MosaicEnv$index <- .MosaicEnv$index + 1L
-        qvSaveWidget(.MosaicEnv$toplevel, outfile)
+        qexport(.MosaicEnv$toplevel, file = outfile)
     }
     ## gc()
 }
@@ -217,7 +237,8 @@ export.mosaiq <- function(file = .MosaicEnv$file)
 
 mosaiq.xyplot <- 
     function(x, y = NULL, data, enclos, groups = NULL, 
-             legend = auto.legend("points", panel.vars, data = data, enclos = enclos, legend.args = legend.args), legend.args = list(),
+             legend = auto.legend("points", panel.vars, data = data, enclos = enclos, legend.args = legend.args),
+             legend.args = list(),
              panel = panel.mosaiq.xyplot, prepanel = prepanel.mosaiq.xyplot,
              ...)
 {
@@ -229,7 +250,8 @@ mosaiq.xyplot <-
 
 mosaiq.densityplot <- 
     function(x, data, enclos, weights = NULL, groups = NULL, 
-             legend = auto.legend("lines", panel.vars, data = data, enclos = enclos, legend.args = legend.args), legend.args = list(),
+             legend = auto.legend("lines", panel.vars, data = data, enclos = enclos, legend.args = legend.args),
+             legend.args = list(),
              panel = panel.mosaiq.densityplot, prepanel = prepanel.mosaiq.densityplot, ...)
 {
     panel.vars <- panel.terms(list(x = substitute(x), weights = substitute(weights), groups = substitute(groups)))
@@ -240,7 +262,8 @@ mosaiq.densityplot <-
 
 mosaiq.qqmath <- 
     function(x, data, enclos, groups = NULL, 
-             legend = auto.legend("points", panel.vars, data = data, enclos = enclos, legend.args = legend.args), legend.args = list(),
+             legend = auto.legend("points", panel.vars, data = data, enclos = enclos, legend.args = legend.args),
+             legend.args = list(),
              panel = panel.mosaiq.qqmath, prepanel = prepanel.mosaiq.qqmath, ...)
 {
     panel.vars <- panel.terms(list(x = substitute(x), weights = substitute(weights), groups = substitute(groups)))
@@ -251,7 +274,8 @@ mosaiq.qqmath <-
 
 mosaiq.histogram <- 
     function(x, data, enclos, 
-             legend = auto.legend("rectangles", panel.vars, data = data, enclos = enclos, legend.args = legend.args), legend.args = list(),
+             legend = auto.legend("rectangles", panel.vars, data = data, enclos = enclos, legend.args = legend.args),
+             legend.args = list(),
              panel = panel.mosaiq.histogram, prepanel = prepanel.mosaiq.histogram, ...)
 {
     panel.vars <- panel.terms(list(x = substitute(x)))
@@ -262,7 +286,8 @@ mosaiq.histogram <-
 
 mosaiq.dotplot <- 
     function(x, y = NULL, data, enclos, groups = NULL, 
-             legend = auto.legend("points", panel.vars, data = data, enclos = enclos, legend.args = legend.args), legend.args = list(),
+             legend = auto.legend("points", panel.vars, data = data, enclos = enclos, legend.args = legend.args),
+             legend.args = list(),
              panel = panel.mosaiq.dotplot, prepanel = prepanel.mosaiq.dotplot, ...)
 {
     panel.vars <- panel.terms(list(x = substitute(x), y = substitute(y), groups = substitute(groups)))
@@ -274,7 +299,8 @@ mosaiq.dotplot <-
 
 mosaiq.bwplot <- 
     function(x, y = NULL, data, enclos, groups = NULL, 
-             legend = auto.legend(c("points", "lines"), panel.vars, data = data, enclos = enclos, legend.args = legend.args), legend.args = list(),
+             legend = auto.legend(c("points", "lines"), panel.vars, data = data, enclos = enclos, legend.args = legend.args),
+             legend.args = list(),
              panel = panel.mosaiq.bwplot, prepanel = prepanel.mosaiq.bwplot, ...)
 {
     panel.vars <- panel.terms(list(x = substitute(x), y = substitute(y), groups = substitute(groups)))
@@ -285,7 +311,8 @@ mosaiq.bwplot <-
 
 mosaiq.barchart <- 
     function(x, y = NULL, data, enclos, groups = NULL, 
-             legend = auto.legend("rectangles", panel.vars, data = data, enclos = enclos, legend.args = legend.args), legend.args = list(),
+             legend = auto.legend("rectangles", panel.vars, data = data, enclos = enclos, legend.args = legend.args),
+             legend.args = list(),
              panel = panel.mosaiq.barchart, prepanel = prepanel.mosaiq.barchart, ...)
 {
     panel.vars <- panel.terms(list(x = substitute(x), y = substitute(y), groups = substitute(groups)))

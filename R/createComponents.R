@@ -16,13 +16,20 @@ create.panels <-
             {
                 local(
                   {
-                      scene <- qgraphicsScene()
-                      root <- qlayer(scene)
+                      ## scene <- qgraphicsScene()
+                      ## root <- qlayer(scene)
+
                       paintFun <- function(item, painter, exposed)
                       {
                           ## message("i is ", i)
                           ## str(packets[[i]])
                           ## qv.panel.fill(col = "transparent", border = "black")
+
+                          cl <- list(xlim = exposed[, 1], ylim = exposed[, 2])
+                          const <- 0
+                          mosaiq.rect(cl$xlim[1]+const, cl$ylim[1]+const,
+                                      cl$xlim[2]-const, cl$ylim[2]-const, 
+                                      col = "black", fill = "transparent", painter = painter)
                           panel(panel.vars = panel.vars,
                                 packet = packets[[i]],
                                 limits = limits[[i]],
@@ -34,24 +41,20 @@ create.panels <-
                       }
                       ## FIXME: do we really need this hack?
                       assign("i", i, environment(paintFun))
-                      panel.layer <- qlayer(root, paintFun = paintFun)
+                      panel.layer <- qlayer(NULL, paintFun = paintFun)
                       qlimits(panel.layer) <-
                           qrect(limits[[i]]$xlim, limits[[i]]$ylim)
-                      ## qcacheMode(panel.layer) <- "none"
-                      view <- qplotView(scene = scene,
-                                        rescale = "geometry",
-                                        opengl = FALSE)
-                      view$focusPolicy <- 0
-                      ## qsetDragMode(view, "scroll")
-                      qsetExpanding(view, vertical = TRUE, horizontal = TRUE)
-                      .MosaicEnv$panelview <- view
-                      view
+                      qcacheMode(panel.layer) <- "none"
+                      qminimumSize(panel.layer) <- qsize(20, 20)
+                      panel.layer
                   })
             }
         }
     }
     ans
 }
+
+
 
 create.strip.top <-
     function(layout,
@@ -73,22 +76,14 @@ create.strip.top <-
         i <- layout[p]
         if (i > 0)
         {
-            container <- qwidget()
-            l <- qlayout(NULL)
-            l$margin <- 0
-            l$spacing <- 0
-            qsetLayout(container, l)
-            for (w in which.margins)
-            {
-                lab <- qlabel(as.character(margin.combs[i, w]))
-                lab$alignment <- 132 ## centers both h and v
-                ## lab$styleSheet <- " QLabel { background: #CCCCCC; } "
-                lab$styleSheet <- " QLabel { background: #CCCCCC; border: black; } "
-                ## bg = fill[w], border = col[w])
-                qaddWidgetToLayout(l, lab, nmargin + 1L - w, 1)
-            }
-            qsetExpanding(container, vertical = FALSE, horizontal = TRUE)
-            ans[[p]] <- container
+            labs <-
+                sapply(which.margins,
+                       function(w) {
+                           as.character(margin.combs[i, w])
+                       })
+            ans[[p]] <-
+                labelLayer(paste(labs, collapse = "/"),
+                           col = col, fill = fill)
         }
     }
     ans
@@ -144,6 +139,138 @@ create.yaxis.right <- function(...)
 
 
 create.page <-
+    function(page = 1,
+             panel.widgets,
+             strip.top.widgets,
+             xaxis.bottom.widgets,
+             xaxis.top.widgets,
+             yaxis.left.widgets,
+             yaxis.right.widgets,
+             relation,
+             alternating)
+{
+    ldim <- dim(panel.widgets)
+    if (page > ldim[3]) stop("Invalid value of 'page'")
+
+    if (relation$x == "same") 
+    {
+        xaxis.bottom.row <- ldim[2]
+        xaxis.top.row <- 1L
+    }
+    else 
+    {
+        xaxis.bottom.row <- seq_len(ldim[2])
+        xaxis.top.row <- integer(0)
+    }
+
+    if (relation$y == "same") 
+    {
+        yaxis.right.column <- ldim[1]
+        yaxis.left.column <- 1L
+    }
+    else 
+    {
+        yaxis.left.column <- seq_len(ldim[1])
+        yaxis.right.column <- integer(0)
+    }
+
+
+    scene <- qgraphicsScene()
+    root <- qlayer(scene)
+
+
+    checkAndAdd <- function(x, layer, i, j,
+                            colstretch = 0, rowstretch = 0)
+    {
+        if (is(layer, "QViz::RLayer"))
+        {
+            qaddItem(x, layer, i, j)
+            qrowStretch(layer) <- rowstretch
+            qcolStretch(layer) <- colstretch
+        }
+    }
+
+    ## panels
+    for (column in seq_len(ldim[1]))
+        for (row in seq_len(ldim[2]))
+        {
+            pos <- compute.position(column, row, what = "panel")
+            checkAndAdd(root,
+                        panel.widgets[column, row, page][[1]],
+                        pos["row"], pos["column"],
+                        colstretch = 1, rowstretch = 1)
+        }
+    ## strip.top
+    for (column in seq_len(ldim[1]))
+        for (row in seq_len(ldim[2]))
+        {
+            pos <- compute.position(column, row, what = "strip.top")
+            checkAndAdd(root,
+                        strip.top.widgets[column, row, page][[1]],
+                        pos["row"], pos["column"],
+                        colstretch = 1, rowstretch = 0)
+        }
+    ## xaxis
+    for (column in seq_len(ldim[1]))
+    {
+        ## bottom
+        for (row in xaxis.bottom.row)
+        {
+            if (rep(alternating$x, length = column)[column] %in% c(0, 2)) next
+            pos <- compute.position(column, row, what = "xaxis.bottom")
+            checkAndAdd(root,
+                        xaxis.bottom.widgets[column, row, page][[1]],
+                        pos["row"], pos["column"],
+                        colstretch = 1, rowstretch = 0)
+        }
+        ## top
+        for (row in xaxis.top.row)
+        {
+            if (rep(alternating$x, length = column)[column] %in% c(0, 1)) next
+            pos <- compute.position(column, row, what = "xaxis.top")
+            checkAndAdd(root,
+                        xaxis.top.widgets[column, row, page][[1]],
+                        pos["row"], pos["column"],
+                        colstretch = 1, rowstretch = 0)
+            
+        }
+    }
+    
+    ## yaxis
+    for (row in seq_len(ldim[2]))
+    {
+        for (column in yaxis.left.column)
+        {
+            if (rep(alternating$y, length = row)[row] %in% c(0, 2)) next
+            pos <- compute.position(column, row, what = "yaxis.left")
+            checkAndAdd(root,
+                        yaxis.left.widgets[column, row, page][[1]],
+                        pos["row"], pos["column"],
+                        colstretch = 0, rowstretch = 1)
+        }
+        for (column in yaxis.right.column)
+        {
+            if (rep(alternating$y, length = row)[row] %in% c(0, 1)) next
+            pos <- compute.position(column, row, what = "yaxis.right")
+            checkAndAdd(root,
+                        yaxis.right.widgets[column, row, page][[1]],
+                        pos["row"], pos["column"],
+                        colstretch = 0, rowstretch = 1)
+        }
+    }
+    ## .MosaicEnv$panel.layout <- l
+    ## container
+
+    view <- qplotView(scene = scene, opengl = FALSE)
+    view$focusPolicy <- 0
+    view
+
+}
+
+
+
+
+create.page.QWidget <-
     function(page = 1,
              panel.widgets,
              strip.top.widgets,
@@ -255,4 +382,6 @@ create.page <-
     .MosaicEnv$panel.layout <- l
     container
 }
+
+
 

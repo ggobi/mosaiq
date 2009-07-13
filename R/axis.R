@@ -1,4 +1,61 @@
 
+labelLayer <- function(s, rot = 0,
+                       col = "black", fill = "transparent")
+{
+    force(s)
+    paintFun <- function(item, painter, exposed)
+    {
+        mosaiq.fill(col = fill, border = col, 
+                    item = item,
+                    painter = painter,
+                    exposed = exposed)
+        qdrawText(painter, as.character(s), 0.5, 0.5,
+                  halign = "center", valign = "center",
+                  rot = rot)
+    }
+    label.layer <- qlayer(NULL, paintFun)
+    qlimits(label.layer) <- qrect(c(0, 1), c(0, 1))
+    qminimumSize(label.layer) <- qsize(15, 15)
+    qcacheMode(label.layer) <- "none"
+    label.layer
+}
+
+
+labelWidget <-
+    function(s, horizontal = TRUE, 
+             col = "transparent", fill = "transparent")
+{
+    ans <- qlabel(s)
+    ans$alignment <- 132
+    ans
+}
+
+
+
+## labelWidget <-
+##     function(s, horizontal = TRUE, 
+##              col = "transparent", fill = "transparent")
+## {
+##     rot <- if (horizontal) 0 else 90
+##     scene <- qgraphicsScene()
+##     root <- qlayer(scene)
+##     layer <- labelLayer(s, rot = rot,
+##                         col = "green", fill = fill)
+    
+##     qaddItem(root, layer, 0, 0)
+##     qrowStretch(layer) <- as.integer(!horizontal)
+##     qcolStretch(layer) <- as.integer(horizontal)
+##     view <- qplotView(scene = scene, opengl = FALSE)
+##     view$focusPolicy <- 0
+##     ## qsetExpanding(view, vertical = !horizontal, horizontal = horizontal)
+##     qsetExpanding(view, vertical = FALSE, horizontal = FALSE)
+##     view$size <- qpoint(20, 20)
+##     view
+## }
+
+
+
+
 qxaxis <-
     function(xlim, tick.number = 5,
              at = pretty(xlim, tick.number),
@@ -17,23 +74,35 @@ qxaxis <-
     id <- at >= xlim[1] & at <= xlim[2]
     at <- at[id]
     labels <- labels[id]
-    scene <- qgraphicsScene()
-    root <- qlayer(scene)
-    paintFun <- function(item, painter, exposed)
-    {
-        qdrawText(painter, labels, at, 0.5,
-                  halign = "center", valign = "center",
-                  rot = rot)
-        ## add segments
-    }
-    axis.layer <- qlayer(root, paintFun)
-    qlimits(axis.layer) <- qrect(xlim, c(0, 1))
-    view <- qplotView(scene = scene,
-                      rescale = "geometry",
-                      opengl = FALSE)
-    view$focusPolicy <- 0
-    qsetExpanding(view, vertical = FALSE, horizontal = TRUE)
-    view
+    paintFun <-
+        switch(side,
+               bottom = function(item, painter, exposed)
+           {
+               mosaiq.segments(at, 1, at, 1.3,
+                               col = "black", painter = painter)
+               qdrawText(painter, labels, at, 0.5,
+                         halign = "center", valign = "center",
+                         rot = rot)
+           },
+               top = function(item, painter, exposed)
+           {
+               mosaiq.segments(at, -0.3, at, 0,
+                               col = "black", painter = painter)
+               qdrawText(painter, labels, at, 0.5,
+                         halign = "center", valign = "center",
+                         rot = rot)
+           })
+    axis.layer <- qlayer(NULL, paintFun)
+    qlimits(axis.layer) <-
+        qrect(xlim,
+              switch(side,
+                     bottom = c(0, 1.3),
+                     top = c(-0.3, 1)))
+    qminimumSize(axis.layer) <- qsize(20, 20)
+    qcacheMode(axis.layer) <- "none"
+    qrowStretch(axis.layer) <- 0
+    qcolStretch(axis.layer) <- 1
+    axis.layer
 }
 
 
@@ -58,27 +127,20 @@ qyaxis <-
     id <- at >= ylim[1] & at <= ylim[2]
     at <- at[id]
     labels <- labels[id]
-    scene <- qgraphicsScene()
-    root <- qlayer(scene)
     paintFun <- function(item, painter, exposed)
     {
         ## FIXME: how to convey width?
-        labsize <- lapply(qstrWidth(painter, labels), max)
+        ## labsize <- lapply(qstrWidth(painter, labels), max)
         qdrawText(painter, labels, x, at,
                   halign = switch(side, left = "right", right = "left"),
                   rot = rot)
         ## add segments
     }
-    axis.layer <- qlayer(root, paintFun)
-    ## qlimits(axis.layer) <- qrect(c(0, labsize), ylim)
+    minwidth <- 10 * max(sapply(labels, nchar))
+    axis.layer <- qlayer(NULL, paintFun)
     qlimits(axis.layer) <- qrect(c(0, 1), ylim)
-    view <- qplotView(scene = scene,
-                      rescale = "geometry",
-                      opengl = FALSE)
-    view$focusPolicy <- 0
-    qsetExpanding(view, vertical = TRUE, horizontal = FALSE)
-    ## qresize(view, w = 100, h = NULL)
-    .MosaicEnv$axisview <- view
-    view
+    qcacheMode(axis.layer) <- "none"
+    qminimumSize(axis.layer) <- qsize(minwidth, 20)
+    axis.layer
 }
 

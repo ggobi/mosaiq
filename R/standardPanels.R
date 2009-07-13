@@ -157,7 +157,7 @@ panel.mosaiq.xyplot <-
         grid <- if (grid) list(h = -5, v = -5) else list(h = 0, v = 0)
     }
     ## mosaiq.fill(col = "yellow", border = "green", ...)
-    mosaiq.grid(h = grid$h, v = grid$v, col = "grey", ...)
+    if (grid$h != 0 || grid$v != 0) mosaiq.grid(h = grid$h, v = grid$v, col = "grey", ...)
     groups <- evaluate(panel.vars$groups, data = data, subset = packet, enclos = enclos)
     if (missing(horizontal)) 
     {
@@ -356,9 +356,10 @@ panel.mosaiq.dotplot <-
              theme = mosaiq.theme(),
              col = theme$dot.symbol$col,
              fill = theme$dot.symbol$fill,
-             col.ref = theme$dot.line$col,
+             ## col.ref = theme$dot.line$col,
              horizontal = TRUE)
 {
+    col.ref <- theme$dot.line$col
     if (give.limits)
         return(prepanel.mosaiq.xyplot(panel.vars = panel.vars, packet = packet,
                                       data = data, enclos = enclos, ...))
@@ -368,11 +369,10 @@ panel.mosaiq.dotplot <-
     {
         horizontal <- if (is.factor(x)) FALSE else TRUE
     }
-    qv.setPar(col = col.ref)
     if (horizontal)
-        qv.panel.abline(h = unique(as.numeric(y)))
+        mosaiq.abline(h = unique(as.numeric(y)), col = col.ref, ...)
     else 
-        qv.panel.abline(v = unique(as.numeric(x)))
+        mosaiq.abline(v = unique(as.numeric(x)), col = col.ref, ...)
     panel.mosaiq.xyplot(panel.vars = panel.vars, packet = packet,
                         data = data, enclos = enclos,
                         give.limits = FALSE,

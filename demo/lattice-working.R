@@ -1,14 +1,8 @@
 
+
 library(mosaiq)
 
-## export.mosaiq("fig/mosaiq_%03g.png")
-
-
-## ## error with no strips
-## mosaiq.xyplot(y ~ x,
-##               data = list(x = rnorm(10), y = rnorm(10), a = gl(2, 5)),
-##               type = 'o')
-
+export.mosaiq("fig/mosaiq_%03g.png")
 
 mydata <-
     data.frame(x = 1:1000, y = rnorm(1000),
@@ -16,13 +10,14 @@ mydata <-
                a = gl(1, 1000))
 
 mosaiq.xyplot(y ~ x, data = mydata,
-              margin = ~a, groups = g,
+              ## margin = ~a,
+              groups = g,
               grid = TRUE)
 
 mosaiq.xyplot(y ~ x, data = mydata, groups = g,
               margin = ~g, layout = c(2, 2))
 
-mosaiq.xyplot(y ~ x, data = mydata)
+mosaiq.xyplot(y ~ x, data = mydata, main = "foo", xlab = "x", ylab = "y")
 
 mosaiq.densityplot(~ y, data = mydata, groups = g, 
                    margin = ~a)
@@ -51,20 +46,19 @@ mosaiq.densityplot(gcsescore, data = Chem97, groups = score,
 data(Oats, package = "nlme")
 
 mosaiq.xyplot(yield ~ nitro, data = Oats,
-              margin = ~ Variety + Block, type = 'o')
+              margin = ~ Block + Variety, type = 'o')
+
+mosaiq.xyplot(yield ~ nitro, data = Oats,
+              margin = ~ Block + Variety, type = 'o',
+              layout = c(3, 2),
+              main = "Yield of Oats")
+
 
 data(barley, package = "lattice")
 
-mosaiq.xyplot(yield, variety, data = barley,
-              ## groups = year,
-              margin = ~ site,
-              ## aspect = c(0.7),
-              layout = c(1, 6))
-
-
 
 mosaiq.dotplot(yield, variety, data = barley, groups = year, margin = ~ site,
-               layout = c(1, 6), aspect = c(0.7))
+               layout = c(1, 6), aspect = c(0.7), grid = FALSE)
 
 mosaiq.xyplot(yield, variety, data = barley, jitter.y = TRUE)
 
@@ -98,7 +92,7 @@ mosaiq.bwplot(factor(score) ~ gcsescore, data = Chem97,
               xlab = "Average GCSE Score")
 
 mosaiq.bwplot(gcsescore^2.34 ~ gender, data = Chem97,
-              margin = ~ factor(score),
+              margin = ~ factor(score), as.table = FALSE,
               varwidth = TRUE, layout = c(6, 1),
-              ylab = "Transformed GCSE score")
+              main = "Transformed GCSE score")
 

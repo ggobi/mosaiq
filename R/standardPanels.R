@@ -609,3 +609,38 @@ panel.mosaiq.barchart <-
 prepanel.mosaiq.barchart <- function(..., give.limits)
     panel.mosaiq.barchart(..., give.limits = TRUE)
 
+
+
+## maps
+
+prepanel.mosaiq.mapplot <- function(..., give.limits)
+    panel.mosaiq.mapplot(..., give.limits = TRUE)
+
+
+panel.mosaiq.mapplot <-
+    function(panel.vars = list(x = NULL, y = NULL),
+             packet, data, enclos,
+             map,
+             give.limits = FALSE,
+             cuts = 30, breaks,
+             colramp = colorRampPalette(c("white", "black")),
+             ...)
+{
+    if (give.limits) return(default.limits(map$x, map$y))
+    x <- evaluate(panel.vars$x, data = data, subset = packet, enclos = enclos)
+    y <- evaluate(panel.vars$y, data = data, subset = packet, enclos = enclos)
+    names(x) <- as.character(y)
+    if (missing(breaks))
+        breaks <-
+            if (is.factor(x)) seq_len(1 + nlevels(x)) - 0.5
+            else do.breaks(range(x, finite = TRUE), cuts)
+    interval <-
+        cut(x[map$names], breaks = breaks,
+            labels = FALSE, include.lowest = TRUE)
+    col.regions <- colramp(length(breaks) - 1)
+    col <- col.regions[interval]
+    mosaiq.polygon(map, col = col, ...)
+}
+
+
+

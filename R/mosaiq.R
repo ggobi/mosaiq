@@ -321,4 +321,18 @@ mosaiq.barchart <-
     mosaiq(data = data, enclos = enclos, panel.vars = panel.vars, panel = panel, prepanel = prepanel, legend = legend, ...)
 }
 
+## maps
 
+
+mosaiq.mapplot <- 
+    function(x, y = NULL, data, enclos, 
+             panel = panel.mosaiq.mapplot, prepanel = prepanel.mosaiq.mapplot, ...)
+{
+    panel.vars <- panel.terms(list(x = substitute(x), y = substitute(y)))
+    if (missing(data)) data <- parent.frame()
+    if (missing(enclos)) enclos <- parent.frame()
+    mosaiq(data = data, enclos = enclos,
+           panel.vars = panel.vars,
+           panel = panel,
+           prepanel = prepanel, ...)
+}

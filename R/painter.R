@@ -193,8 +193,6 @@ mosaiq.grid <-
                       col = col, ..., item = item, painter = painter, exposed = exposed)
 }
 
-
-
 mosaiq.rect <-
     function(xleft, ybottom, xright, ytop,
              x = (xleft + xright)/2, 
@@ -220,6 +218,31 @@ mosaiq.rect <-
               fill = rgb.fill)
 }
 
+mosaiq.polygon <-
+    function(x, y = NULL,
+             border = "black",
+             col = "transparent",
+             ...,
+             painter) 
+{
+    qantialias(painter) <- FALSE
+    if (sum(!is.na(x)) < 1) return()
+    border <- 
+        if (all(is.na(border)))
+            "transparent"
+        else if (is.logical(border))
+        {
+            if (border) "black"
+            else "transparent"
+        }
+        else border
+    xy <- xy.coords(x, y, recycle = TRUE)
+    rgb.border <- col2rgb(border, TRUE)
+    rgb.col <- col2rgb(col, TRUE)
+    qdrawPolygon(painter, xy$x, xy$y,
+                 stroke = rgb.border, fill = rgb.col)
+}
+
 
 mosaiq.bars <-
     function(x, y, groups,
@@ -235,6 +258,7 @@ mosaiq.bars <-
              col.ref = theme$reference$col,
              item, painter, exposed)
 {
+    str(list(x, y))
     if (is.null(groups)) groups <- gl(1, length(x))
     groups <- as.factor(groups)
     vals <- levels(groups)
@@ -279,7 +303,8 @@ mosaiq.bars <-
                                 height = rep(box.width, length = nok),
                                 col = col[groups[ok][ord][pos]],
                                 fill = fill[groups[ok][ord][pos]],
-                                ...)
+                                ...,
+                                item= item, painter = painter, exposed = exposed)
                 }
                 neg <- x[ok][ord] < 0
                 nok <- sum(neg, na.rm = TRUE)
@@ -292,7 +317,8 @@ mosaiq.bars <-
                                 height = rep(box.width, nok),
                                 col = col[groups[ok][ord][neg]],
                                 fill = fill[groups[ok][ord][neg]],
-                                ...)
+                                ...,
+                                item= item, painter = painter, exposed = exposed)
                 }
             }
         }
@@ -308,7 +334,8 @@ mosaiq.bars <-
                             height = rep(box.width/nvals, length = nok),
                             col = col[groups[ok]],
                             fill = fill[groups[ok]],
-                            ...)
+                            ...,
+                            item= item, painter = painter, exposed = exposed)
             }
         }
     }
@@ -332,7 +359,8 @@ mosaiq.bars <-
                                 width = rep(box.width, length = nok),
                                 col = col[groups[ok][ord][pos]],
                                 fill = fill[groups[ok][ord][pos]],
-                                ...)
+                                ...,
+                                item= item, painter = painter, exposed = exposed)
                 }
                 neg <- y[ok][ord] < 0
                 nok <- sum(neg, na.rm = TRUE)
@@ -345,7 +373,8 @@ mosaiq.bars <-
                                 width = rep(box.width, nok),
                                 col = col[groups[ok][ord][neg]],
                                 fill = fill[groups[ok][ord][neg]],
-                                ...)
+                                ...,
+                                item= item, painter = painter, exposed = exposed)
                 }
             }
         }
@@ -361,7 +390,8 @@ mosaiq.bars <-
                             width = rep(box.width/nvals, length = nok),
                             col = col[groups[ok]],
                             fill = fill[groups[ok]],
-                            ...)
+                            ...,
+                            item= item, painter = painter, exposed = exposed)
             }
         }
     }

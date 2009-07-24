@@ -1,5 +1,5 @@
 
-create.panels <-
+create.panels.old <-
     function(layout,
              packets, limits,
              panel.vars, panel,
@@ -14,46 +14,114 @@ create.panels <-
         {
             ans[[p]] <-
             {
-                local(
-                  {
-                      ## scene <- qgraphicsScene()
-                      ## root <- qlayer(scene)
-
-                      paintFun <- function(item, painter, exposed)
-                      {
-                          ## message("i is ", i)
-                          ## str(packets[[i]])
-                          ## qv.panel.fill(col = "transparent", border = "black")
-
-                          cl <- list(xlim = exposed[, 1], ylim = exposed[, 2])
-                          const <- 0
-                          mosaiq.rect(cl$xlim[1]+const, cl$ylim[1]+const,
-                                      cl$xlim[2]-const, cl$ylim[2]-const, 
-                                      col = "black", fill = "transparent", painter = painter)
-                          panel(panel.vars = panel.vars,
-                                packet = packets[[i]],
-                                limits = limits[[i]],
-                                data = data,
-                                enclos = enclos, ...,
-                                item = item,
-                                painter = painter,
-                                exposed = exposed)
-                      }
-                      ## FIXME: do we really need this hack?
-                      assign("i", i, environment(paintFun))
-                      panel.layer <- qlayer(NULL, paintFun = paintFun)
-                      qlimits(panel.layer) <-
-                          qrect(limits[[i]]$xlim, limits[[i]]$ylim)
-                      qcacheMode(panel.layer) <- "none"
-                      qminimumSize(panel.layer) <- qsize(20, 20)
-                      panel.layer
-                  })
+                if (!is.list(panel)) panel <- list(panel)
+                lapply(panel,
+                       function(panel.fun)
+                   {
+                       local(
+                         {
+                             i <- i # make local copy, used on repaint
+                             panel.env <- environment()
+                             paintFun <- function(item, painter, exposed)
+                             {
+                                 ## message("i is ", i)
+                                 cl <- list(xlim = exposed[, 1], ylim = exposed[, 2])
+                                 const <- 0
+                                 panel.fun(panel.vars = panel.vars,
+                                           packet = packets[[i]],
+                                           limits = limits[[i]],
+                                           data = data,
+                                           enclos = enclos, ...,
+                                           item = item,
+                                           painter = painter,
+                                           exposed = exposed,
+                                           panel.env = panel.env)
+                                 ## mosaiq.rect(cl$xlim[1]+const, cl$ylim[1]+const,
+                                 ##             cl$xlim[2]-const, cl$ylim[2]-const, 
+                                 ##             col = "black", fill = "transparent", painter = painter)
+                             }
+                             panel.layer <- qlayer(NULL, paintFun = paintFun)
+                             qlimits(panel.layer) <-
+                                 qrect(limits[[i]]$xlim, limits[[i]]$ylim)
+                             qcacheMode(panel.layer) <- "none"
+                             qminimumSize(panel.layer) <- qsize(20, 20)
+                             panel.layer
+                         })
+                   })
             }
         }
     }
     ans
 }
 
+
+
+create.panels.new <-
+    function(layout,
+             packets, limits,
+             panel.vars, panel,
+             data = .GlobalEnv,
+             enclos = .GlobalEnv, ...)
+{
+    panel.box <- 
+        function(item, painter, exposed)
+        {
+            cl <- list(xlim = exposed[, 1], ylim = exposed[, 2])
+            const <- 2
+            mosaiq.rect(cl$xlim[1]+const, cl$ylim[1]+const,
+                        cl$xlim[2]-const, cl$ylim[2]-const, 
+                        col = "black", fill = "transparent", painter = painter)
+        }
+    ans <- array(list(NULL), dim = dim(layout))
+    for (p in seq_len(length(ans)))
+    {
+        i <- layout[p]
+        if (i > 0)
+        {
+            ans[[p]] <-
+            {
+                if (!is.list(panel)) panel <- list(panel)
+                panel.toplayer <- qlayer(NULL)
+
+                lapply(panel,
+                       function(panel.fun)
+                   {
+                       if (is.function(panel.fun))
+                           local(
+                             {
+                                 i <- i # make local copy, used on repaint
+                                 panel.env <- environment() # can be used as panel-specific storage space by panel function
+                                 paintFun <- function(item, painter, exposed)
+                                 {
+                                     ## message("i is ", i)
+                                     panel.fun(panel.vars = panel.vars,
+                                               packet = packets[[i]],
+                                               limits = limits[[i]],
+                                               data = data,
+                                               enclos = enclos, ...,
+                                               item = item,
+                                               painter = painter,
+                                               exposed = exposed,
+                                               panel.env = panel.env)
+                                 }
+                                 panel.layer <- qlayer(panel.toplayer, paintFun = paintFun)
+                                 ## print(i)
+                                 qlimits(panel.layer) <- qrect(limits[[i]]$xlim, limits[[i]]$ylim)
+                                 qcacheMode(panel.layer) <- "none"
+                                 NULL
+                             })
+                   })
+                ## str(panel.toplayer)
+                box.layer <- qlayer(panel.toplayer, paintFun = panel.box)
+                qminimumSize(panel.toplayer) <- qsize(20, 20)
+                panel.toplayer
+            }
+        }
+    }
+    ans
+}
+
+create.panels <- create.panels.new
 
 
 create.strip.top <-
@@ -187,6 +255,10 @@ create.page <-
             qaddItem(x, layer, i, j)
             qrowStretch(layer) <- rowstretch
             qcolStretch(layer) <- colstretch
+        }
+        else if (is.list(layer))
+        {
+            lapply(layer, function(l) checkAndAdd(x, l, i = i, j = j, colstretch = colstretch, rowstretch = rowstretch))
         }
     }
 

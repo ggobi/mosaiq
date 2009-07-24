@@ -6,7 +6,7 @@ library(qtpaint)
 library(mosaiq)
 
 
-gui_xy <- function(col = "red", bg = "black", incr = 5,
+pendulum <- function(col = "red", bg = "black", incr = 5,
                    n = 100, opengl = TRUE, verbose = getOption("verbose"))
 {
     rgb.col <- col2rgb(col, TRUE)
@@ -62,6 +62,7 @@ gui_xy <- function(col = "red", bg = "black", incr = 5,
     
     view <- qplotView(scene = scene, opengl = opengl)
     qsetContextMenuPolicy(view, "actions")
+    qsetDeleteOnClose(view, TRUE)
 
     ## start/stop animation
     timer <- qtimer(100, step)
@@ -79,6 +80,13 @@ gui_xy <- function(col = "red", bg = "black", incr = 5,
              handler = restart)
     qaddAction(view, restartAct)
 
+    ## stop timer on close
+    qconnect(view, signal = "destroyed", 
+             handler = function() {
+                 timer$stop()
+                 message("destroyed!")
+             })
+
     timer$start()
     message("use context menu to control animation")
     view
@@ -86,6 +94,6 @@ gui_xy <- function(col = "red", bg = "black", incr = 5,
 
 ## bug? closing window does not stop timer
 
-view <- gui_xy(col = "red", bg = "orange", incr = 2)
+## view <- pendulum(col = "red", bg = "orange", incr = 2)
 
 

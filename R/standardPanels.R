@@ -147,6 +147,7 @@ panel.mosaiq.xyplot <-
              give.limits = FALSE,
              type = "p", grid = FALSE,
              ...,
+             panel.groups = mosaiq.points,
              horizontal = FALSE)
 {
     x <- evaluate(panel.vars$x, data = data, subset = packet, enclos = enclos)
@@ -172,7 +173,7 @@ panel.mosaiq.xyplot <-
         yr <- limits$ylim
         id <- (x > min(xr) & x < max(xr) & y > min(yr) & y < max(yr))
         mosaiq.superpose(x = x[id], y = y[id], groups = groups[id],
-                         panel.groups = mosaiq.points,
+                         panel.groups = panel.groups,
                          type = type, 
                          horizontal = horizontal, ...)
     }

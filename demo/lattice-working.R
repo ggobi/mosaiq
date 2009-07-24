@@ -29,6 +29,13 @@ mosaiq.histogram(~ y, data = mydata, margin = ~g + a)
 mosaiq.qqmath(y, data = mydata, groups = g, margin = ~a)
 
 
+library("latticeExtra")
+data(gvhd10)
+
+mosaiq.xyplot(SSC.H ~ FSC.H, data = gvhd10, margin = ~Days,
+              panel.groups = mosaiq.smoothScatter)
+
+
 
 
 
@@ -68,6 +75,13 @@ mosaiq.densityplot(x = eruptions, data = faithful, kernel = "rect", bw = 0.2)
 
 library("latticeExtra")
 data(gvhd10)
+
+
+mosaiq.xyplot(SSC.H ~ FSC.H, data = gvhd10, margin = ~Days,
+              panel.groups = mosaiq.smoothScatter)
+
+
+
 
 mosaiq.densityplot(log(FSC.H), data = gvhd10, margin = ~Days, layout = c(2, 4))
 

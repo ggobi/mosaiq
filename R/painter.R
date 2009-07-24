@@ -136,6 +136,7 @@ mosaiq.lmline <- function(x, y, ...)
 mosaiq.points <-
     function(x, y = NULL, type = "p", jitter.x = FALSE, jitter.y = FALSE,
              factor = 0.5, amount = NULL, horizontal = FALSE,
+             pch = qpathCircle(0, 0, 5),
              cex = 1, col = "black", fill = "transparent", ..., painter)
 {
     xy <- xy.coords(x, y, recycle = TRUE)
@@ -143,13 +144,12 @@ mosaiq.points <-
     y <- xy$y
     if (any(is.finite(x) & is.finite(y)))
     {
-        circle <- qpathCircle(0, 0, 5)
         rgb.col <- col2rgb(col, TRUE)
         rgb.fill <- col2rgb(fill, TRUE)
         if ("o" %in% type || "b" %in% type)
             type <- c(type, "p", "l")
         if ("p" %in% type)
-            qdrawGlyph(painter, circle,
+            qdrawGlyph(painter, pch,
                        x = if (jitter.x) jitter(x, factor = factor, amount = amount) else x,
                        y = if (jitter.y) jitter(y, factor = factor, amount = amount) else y,
                        cex = cex, stroke = rgb.col, fill = rgb.fill)
@@ -203,6 +203,7 @@ mosaiq.rect <-
              ...,
              painter)
 {
+    qantialias(painter) <- FALSE
     xy <- xy.coords(x, y, recycle = TRUE)
     x <- xy$x
     y <- xy$y

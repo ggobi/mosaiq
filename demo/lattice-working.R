@@ -2,7 +2,7 @@
 
 library(mosaiq)
 
-export.mosaiq("fig/mosaiq_%03g.png")
+## export.mosaiq("fig/mosaiq_%03g.png")
 
 mydata <-
     data.frame(x = 1:1000, y = rnorm(1000),
@@ -35,6 +35,9 @@ data(gvhd10)
 mosaiq.xyplot(SSC.H ~ FSC.H, data = gvhd10, margin = ~Days,
               panel.groups = mosaiq.smoothScatter)
 
+mosaiq.xyplot(SSC.H ~ FSC.H, data = gvhd10, margin = ~Days,
+              panel = list(panel.mosaiq.xyplot, mosaiq.grid),
+              panel.groups = mosaiq.smoothScatter)
 
 
 

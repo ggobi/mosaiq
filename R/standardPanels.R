@@ -1,4 +1,17 @@
 
+## simple helper function to generate new functions from old ones by
+## overriding certain arguments.
+
+customize <- function(fun, ...)
+{
+    args <- list(...)
+    function(...) {
+        dots <- list(...)
+        do.call(fun, modifyList(dots, args))
+    }
+}
+
+
 null.limits <- function()
 {
     list(xlim = c(NA_real_, NA_real_),

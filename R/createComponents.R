@@ -1,4 +1,5 @@
 
+
 ## panel.box <- function(item, painter, exposed, ...)
 ## {
 ##     cl <- list(xlim = exposed[, 1], ylim = exposed[, 2])
@@ -34,6 +35,8 @@ create.panels.new <-
             {
                 if (!is.list(panel)) panel <- list(panel)
                 panel.toplayer <- qlayer(NULL)
+                qminimumSize(panel.toplayer) <- qsize(20, 20)
+                qcacheMode(panel.toplayer) <- "none"
                 z <- 1
                 ## for (panel.fun in panel) # doesn't work
                 lapply(panel, function(panel.fun)
@@ -64,7 +67,7 @@ create.panels.new <-
                 qcacheMode(box.layer) <- "none"
                 qsetZValue(box.layer, z)
                 qsetItemFlags(box.layer, "clipsToShape", FALSE)
-                qminimumSize(panel.toplayer) <- qsize(20, 20)
+                ## return container layer (to be placed in a layout)
                 panel.toplayer
             }
         }

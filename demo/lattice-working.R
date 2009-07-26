@@ -66,7 +66,6 @@ mosaiq.xyplot(yield ~ nitro, data = Oats,
 
 data(barley, package = "lattice")
 
-
 mosaiq.dotplot(yield, variety, data = barley, groups = year, margin = ~ site,
                layout = c(1, 6), aspect = c(0.7), grid = FALSE)
 

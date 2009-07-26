@@ -3,21 +3,30 @@ labelLayer <- function(s, rot = 0,
                        col = "black", fill = "transparent")
 {
     force(s)
+    ## container layer
+    toplayer <- qlayer(NULL)
+    qminimumSize(toplayer) <- qsize(15, 15)
+    ## background box (unclipped)
+    box.layer <- qlayer(toplayer, paintFun = panel.box(col = col, fill = fill))
+    qcacheMode(box.layer) <- "none"
+    qsetItemFlags(box.layer, "clipsToShape", FALSE)
+    qminimumSize(box.layer) <- qsize(15, 15)
+    qsetZValue(box.layer, 0)
+    ## text label (clipped)
     paintFun <- function(item, painter, exposed)
     {
-        mosaiq.fill(col = fill, border = col, 
-                    item = item,
-                    painter = painter,
-                    exposed = exposed)
         qdrawText(painter, as.character(s), 0.5, 0.5,
                   halign = "center", valign = "center",
                   rot = rot)
     }
-    label.layer <- qlayer(NULL, paintFun)
+    label.layer <- qlayer(toplayer, paintFun)
     qlimits(label.layer) <- qrect(c(0, 1), c(0, 1))
     qminimumSize(label.layer) <- qsize(15, 15)
     qcacheMode(label.layer) <- "none"
-    label.layer
+    qsetItemFlags(label.layer, "clipsToShape", TRUE)
+    qsetZValue(label.layer, 1)
+    ## return container layer
+    toplayer
 }
 
 
@@ -100,8 +109,7 @@ qxaxis <-
                      top = c(-0.3, 1)))
     qminimumSize(axis.layer) <- qsize(20, 20)
     qcacheMode(axis.layer) <- "none"
-    qrowStretch(axis.layer) <- 0
-    qcolStretch(axis.layer) <- 1
+    qsetItemFlags(axis.layer, "clipsToShape", FALSE)
     axis.layer
 }
 
@@ -140,6 +148,7 @@ qyaxis <-
     axis.layer <- qlayer(NULL, paintFun)
     qlimits(axis.layer) <- qrect(c(0, 1), ylim)
     qcacheMode(axis.layer) <- "none"
+    qsetItemFlags(axis.layer, "clipsToShape", FALSE)
     qminimumSize(axis.layer) <- qsize(minwidth, 20)
     axis.layer
 }

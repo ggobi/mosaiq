@@ -1,12 +1,25 @@
 
-panel.box <- function(item, painter, exposed, ...)
+## panel.box <- function(item, painter, exposed, ...)
+## {
+##     cl <- list(xlim = exposed[, 1], ylim = exposed[, 2])
+##     const <- 0
+##     mosaiq.rect(cl$xlim[1]+const, cl$ylim[1]+const,
+##                 cl$xlim[2]-const, cl$ylim[2]-const, 
+##                 col = "black", fill = "transparent", painter = painter)
+## }
+
+panel.box <- function(col = "black", fill = "transparent",...)
 {
-    cl <- list(xlim = exposed[, 1], ylim = exposed[, 2])
-    const <- 2
-    mosaiq.rect(cl$xlim[1]+const, cl$ylim[1]+const,
-                cl$xlim[2]-const, cl$ylim[2]-const, 
-                col = "black", fill = "transparent", painter = painter)
+    function(item, painter, exposed)
+    {
+        mosaiq.fill(col = fill, border = col, 
+                    item = item,
+                    painter = painter,
+                    exposed = exposed)
+    }
 }
+
+
 
 create.panels.new <-
     function(layout, packets, limits, panel, ...)
@@ -47,7 +60,10 @@ create.panels.new <-
                                  z <<- z + 1
                              })
                    })
-                box.layer <- qlayer(panel.toplayer, paintFun = panel.box)
+                box.layer <- qlayer(panel.toplayer, paintFun = panel.box())
+                qcacheMode(box.layer) <- "none"
+                qsetZValue(box.layer, z)
+                qsetItemFlags(box.layer, "clipsToShape", FALSE)
                 qminimumSize(panel.toplayer) <- qsize(20, 20)
                 panel.toplayer
             }

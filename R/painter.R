@@ -183,7 +183,7 @@ mosaiq.grid <-
         mosaiq.abline(h = pretty(cl$ylim, n = -h),
                       col = col, ..., item = item, painter = painter, exposed = exposed)
     if (v < 0)
-        mosaiq.abline(v = pretty(cl$xlim, n = -h),
+        mosaiq.abline(v = pretty(cl$xlim, n = -v),
                       col = col, ..., item = item, painter = painter, exposed = exposed)
     if (h > 0)
         mosaiq.abline(h = do.breaks(cl$ylim, h + 1)[-c(1, h + 2)],

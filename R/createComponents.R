@@ -391,7 +391,7 @@ create.page.QWidget <-
     checkAndAdd <- function(layout, widget, i, j)
     {
         if (is(widget, "QWidget"))
-            qaddWidgetToLayout(layout, widget, i, j)
+            qaddWidget(layout, widget, i, j)
     }
 
     ## panels

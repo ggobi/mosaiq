@@ -153,27 +153,27 @@ mosaiq <-
             if (is(pageWidgets[[i]], "QWidget"))
                 qaddTab(tabw, pageWidgets[[i]], label = sprintf("Page %g", i))
         }
-        qaddWidgetToLayout(lans, tabw, 5, 5)
+        qaddWidget(lans, tabw, 5, 5)
     }
     else if (is(pageWidgets[[1]], "QWidget"))
-        qaddWidgetToLayout(lans, pageWidgets[[1]], 5, 5)
+        qaddWidget(lans, pageWidgets[[1]], 5, 5)
 
     if (!is.null(xlab))
-        qaddWidgetToLayout(lans, 
-                           labelWidget(xlab, horizontal = TRUE),
-                           6, 5)
+        qaddWidget(lans, 
+                   labelWidget(xlab, horizontal = TRUE),
+                   6, 5)
     if (!is.null(ylab))
-        qaddWidgetToLayout(lans, 
-                           labelWidget(ylab, horizontal = FALSE),
-                           5, 4)
+        qaddWidget(lans, 
+                   labelWidget(ylab, horizontal = FALSE),
+                   5, 4)
     if (!is.null(main))
-        qaddWidgetToLayout(lans, 
-                           labelWidget(main, horizontal = TRUE),
-                           1, 1, 1, 9)
+        qaddWidget(lans, 
+                   labelWidget(main, horizontal = TRUE),
+                   1, 1, 1, 9)
     if (!is.null(sub)) 
-        qaddWidgetToLayout(lans, 
-                           labelWidget(sub, horizontal = TRUE),
-                           9, 1, 1, 9)
+        qaddWidget(lans, 
+                   labelWidget(sub, horizontal = TRUE),
+                   9, 1, 1, 9)
 ##     if (!is.null(legend)) 
 ##     {
 ##         for (space in names(legend))
@@ -206,7 +206,7 @@ print.mosaiq <- function(x, row = 1, col = 1, ...)
         qshow(.MosaicEnv$toplevel)
     }
     if (is(x, "QWidget"))
-        qaddWidgetToLayout(.MosaicEnv$toplayout, x, row, col)
+        qaddWidget(.MosaicEnv$toplayout, x, row, col)
     qupdate(.MosaicEnv$toplevel)
     export.mosaiq()
     invisible(x)

@@ -88,6 +88,7 @@ mosaiq <-
              ## specify how to alternate labels
              alternating = list(),
 
+             xlim = NULL, ylim = NULL,
              xlab = NULL, ylab = NULL,
              main = NULL, sub = NULL,
 
@@ -115,7 +116,7 @@ mosaiq <-
                        prepanel = prepanel,
                        data = data,
                        enclos = enclos, ...)
-    limits <- combine.limits(limits, relation = relation)
+    limits <- combine.limits(limits, relation = relation, xlim = xlim, ylim = ylim)
 
     ## create component widgets
     panelWidgets <-

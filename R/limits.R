@@ -19,7 +19,8 @@ compute.limits <-
 combine.limits <-
     function(limits,
              relation = relation(),
-             tick.number = 5)
+             tick.number = 5,
+             xlim = NULL, ylim = NULL)
 {
     ## needs thought. 'margin' is intended to control combination
     ## across margins; e.g., may want a common scale for rows only.
@@ -32,13 +33,13 @@ combine.limits <-
     xat <- unlist(lapply(limits, "[[", "xat"))
     if (is.null(xat))
     {
-        xlim <- extendrange(unlist(lapply(limits, "[[", "xlim")))
+        if (is.null(xlim)) xlim <- extendrange(unlist(lapply(limits, "[[", "xlim")))
         xat <- pretty(xlim, tick.number)
         xlabels <- format(xat)
     }
     else # factor? (not necessarily; e.g., date-time, explicit specification)
     {
-        xlim <- range(unlist(lapply(limits, "[[", "xlim"))) + c(-0.6, 0.6)
+        if (is.null(xlim)) xlim <- range(unlist(lapply(limits, "[[", "xlim"))) + c(-0.6, 0.6)
         xlabels <- unlist(lapply(limits, "[[", "xlabels"))
         xid <- !duplicated(xat)
         xat <- xat[xid]
@@ -47,13 +48,13 @@ combine.limits <-
     yat <- unlist(lapply(limits, "[[", "yat"))
     if (is.null(yat))
     {
-        ylim <- extendrange(unlist(lapply(limits, "[[", "ylim")))
+        if (is.null(ylim)) ylim <- extendrange(unlist(lapply(limits, "[[", "ylim")))
         yat <- pretty(ylim, tick.number)
         ylabels <- format(yat)
     }
     else 
     {
-        ylim <- range(unlist(lapply(limits, "[[", "ylim"))) + c(-0.6, 0.6)
+        if (is.null(ylim)) ylim <- range(unlist(lapply(limits, "[[", "ylim"))) + c(-0.6, 0.6)
         ylabels <- unlist(lapply(limits, "[[", "ylabels"))
         yid <- !duplicated(yat)
         yat <- yat[yid]

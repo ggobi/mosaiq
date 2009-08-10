@@ -251,10 +251,8 @@ create.page <-
         yaxis.right.column <- integer(0)
     }
 
-
     scene <- qgraphicsScene()
     root <- qlayer(scene)
-
 
     checkAndAdd <- function(x, layer, i, j,
                             colstretch = 0, rowstretch = 0)

@@ -14,8 +14,10 @@ mosaiq.xyplot(y ~ x, data = mydata,
               groups = g,
               grid = TRUE)
 
-mosaiq.xyplot(y ~ x, data = mydata, groups = g,
-              margin = ~g, layout = c(2, 2))
+myplot <-
+    mosaiq.xyplot(y ~ x, data = mydata, groups = g,
+                  margin = ~g, layout = c(2, 2))
+
 
 mosaiq.xyplot(y ~ x, data = mydata, main = "foo", xlab = "x", ylab = "y")
 

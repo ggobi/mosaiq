@@ -98,6 +98,13 @@ mosaiq <-
              outer.padding = 10,
              ...)
 {
+
+    ## an environment to store shared information, notably axis
+    ## limits.  All panel, axis functions, etc. have access to this.
+    ## Panel functions (but not prepanel functions) also have access
+    ## to a panel-specific environment 'panel.env'
+    shared.env <- new.env(parent = emptyenv())
+
     relation <- do.call(mosaiq.relation, relation)
     alternating <- do.call(mosaiq.alternating, alternating)
     if (inherits(margin.vars, "formula"))
@@ -110,23 +117,24 @@ mosaiq <-
             else dim(packets)[1:2]
     }
     panel.layout <- compute.layout(layout, dim(packets), skip = skip)
-    limits <-
+    packet.limits <-
         compute.limits(packets = packets,
                        panel.vars = panel.vars,
                        prepanel = prepanel,
                        data = data,
                        enclos = enclos, ...)
-    limits <- combine.limits(limits, relation = relation, xlim = xlim, ylim = ylim)
+    shared.env$limits <- combine.limits(packet.limits, relation = relation, xlim = xlim, ylim = ylim)
 
     ## create component widgets
     panelWidgets <-
-        create.panels(layout = panel.layout, packets = packets, limits = limits,
-                      panel.vars = panel.vars, panel = panel, data = data, enclos = enclos, ...)
-    stripTopWidgets <- create.strip.top(layout = panel.layout, packets = packets, ...)
-    xaxisBottomWidgets <- create.xaxis.bottom(layout = panel.layout, limits = limits, ...)
-    xaxisTopWidgets <- create.xaxis.top(layout = panel.layout, limits = limits, ...)
-    yaxisLeftWidgets <- create.yaxis.left(layout = panel.layout, limits = limits, ...)
-    yaxisRightWidgets <- create.yaxis.right(layout = panel.layout, limits = limits, ...)
+        create.panels(layout = panel.layout, packets = packets, #limits = limits,
+                      panel.vars = panel.vars, panel = panel, data = data, enclos = enclos,
+                      shared.env = shared.env, ...)
+    stripTopWidgets <- create.strip.top(layout = panel.layout, packets = packets, shared.env = shared.env, ...)
+    xaxisBottomWidgets <- create.xaxis.bottom(layout = panel.layout, shared.env = shared.env, ...)
+    xaxisTopWidgets <- create.xaxis.top(layout = panel.layout, shared.env = shared.env, ...)
+    yaxisLeftWidgets <- create.yaxis.left(layout = panel.layout, shared.env = shared.env, ...)
+    yaxisRightWidgets <- create.yaxis.right(layout = panel.layout, shared.env = shared.env, ...)
 
     ## create a 'figure region' widget for each page
     pageWidgets <-
@@ -186,7 +194,9 @@ mosaiq <-
 ##                    left = { ans[5, 7] <- legend[[space]] })
 ##         }
 ##     }
+    shared.env$widget <- ans
     class(ans) <- c("mosaiq", class(ans))
+    attr(ans, "shared.env") <- shared.env
     ans
 }
 

@@ -23,8 +23,9 @@ panel.box <- function(col = "black", fill = "transparent",...)
 
 
 create.panels.new <-
-    function(layout, packets, limits, panel, ...)
+    function(layout, packets, panel, shared.env, ...)
 {
+    limits <- shared.env$limits
     ans <- array(list(NULL), dim = dim(layout))
     for (p in seq_len(length(ans)))
     {
@@ -48,6 +49,10 @@ create.panels.new <-
                                  panel.env <- environment() # can be used as panel-specific storage space by panel function
                                  paintFun <- function(item, painter, exposed)
                                  {
+                                     limits <- shared.env$limits
+                                     ## str(limits[[i]])
+                                     qlimits(item) <- qrect(limits[[i]]$xlim, limits[[i]]$ylim)
+                                     ## str(qlimits(item))
                                      panel.fun(packet = packets[[i]],
                                                limits = limits[[i]],
                                                ...,
@@ -77,11 +82,13 @@ create.panels.new <-
 
 create.panels.old <-
     function(layout,
-             packets, limits,
+             packets, 
              panel.vars, panel,
              data = .GlobalEnv,
-             enclos = .GlobalEnv, ...)
+             enclos = .GlobalEnv,
+             shared.env, ...)
 {
+    limits <- shared.env$limits
     ans <- array(list(NULL), dim = dim(layout))
     for (p in seq_len(length(ans)))
     {
@@ -137,6 +144,7 @@ create.strip.top <-
     function(layout,
              packets,
              which.margins = seq_along(dim(packets)),
+             shared.env, 
              ...,
              theme = mosaiq.theme(),
              col = theme$strip$col,
@@ -168,13 +176,14 @@ create.strip.top <-
 
 
 create.axis <-
-    function(layout, limits, which, side,
+    function(layout, which, side, shared.env, 
              theme = mosaiq.theme(),
              col = theme$axis$col[1],
              font = qv.font(family = theme$axis$famiy,
                             pointsize = theme$axis$pointsize),
              ...)
 {
+    limits <- shared.env$limits
     ans <- array(list(NULL), dim = dim(layout))
     for (p in seq_len(length(ans)))
     {

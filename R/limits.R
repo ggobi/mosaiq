@@ -8,7 +8,8 @@ compute.limits <-
     {
         ans[[i]] <-
             prepanel(panel.vars = panel.vars,
-                     packet = packets[[i]],
+                     which.packet = i,
+                     packets = packets,
                      data = data,
                      enclos = enclos, ...)
     }

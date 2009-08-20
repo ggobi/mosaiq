@@ -15,8 +15,8 @@ tsplot <- function(y, x = NULL)
             if (is(x, "ts")) times(y)
             else seq_along(y)
     render_data<- function(item, painter, exposed) {
-        qantialias(painter) <- FALSE
-        mosaiq.points(x = x, y = y, type = "l", painter = painter)
+        qantialias(painter) <- TRUE
+        mosaiq.points(x = x, y = y, type = "o", painter = painter)
     }
     handle_wheel <- function(event)
     {
@@ -24,10 +24,11 @@ tsplot <- function(y, x = NULL)
         lims <- qlimits(points)
         llist <- list(xlim = lims[, 1], ylim = lims[, 2])
         f <- -0.01 * event$delta / 120
-        qlimits(points) <-
+        qlimits(event$item) <-
             qrect(extendrange(llist$xlim, f = f),
                   llist$ylim)
-        qupdate(points)
+        qupdate(view)
+        ## qupdate(points)
     }
     scene <- qgraphicsScene()
     root <- qlayer(scene)

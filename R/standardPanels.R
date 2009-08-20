@@ -45,13 +45,14 @@ default.limits <- function(x, y)
 
 panel.mosaiq.densityplot <-
     function(panel.vars = list(x = NULL, weights = NULL, groups = NULL),
-             packet,
-             limits = NULL,
+             which.packet, packets,
              data,
              enclos,
              give.limits = FALSE,
-             ...)
+             ...,
+             shared.env)
 {
+    packet <- packets[[which.packet]]
     x <- evaluate(panel.vars$x, data = data, subset = packet, enclos = enclos)
     if (is.null(x)) stop("'x' cannot be NULL")
     x <- as.numeric(x)
@@ -84,6 +85,8 @@ panel.mosaiq.densityplot <-
         return(with(xy,
                     list(xlim = range(x),
                          ylim = c(0, max(y)))))
+    ## else
+    limits <- shared.env$limits[[which.packet]]
     xr <- limits$xlim
     yr <- limits$ylim
     id <- with(xy, (x > min(xr) & x < max(xr) &
@@ -153,16 +156,17 @@ mosaiq.superpose <-
 
 panel.mosaiq.xyplot <-
     function(panel.vars = list(x = NULL, y = NULL, groups = NULL),
-             packet,
-             limits = NULL,
+             which.packet, packets,
              data,
              enclos,
              give.limits = FALSE,
              type = "p", grid = FALSE,
              ...,
              panel.groups = mosaiq.points,
-             horizontal = FALSE)
+             horizontal = FALSE,
+             shared.env)
 {
+    packet <- packets[[which.packet]]
     x <- evaluate(panel.vars$x, data = data, subset = packet, enclos = enclos)
     y <- evaluate(panel.vars$y, data = data, subset = packet, enclos = enclos)
     if (give.limits) return(default.limits(x, y))
@@ -182,9 +186,12 @@ panel.mosaiq.xyplot <-
     y <- as.numeric(y)
     if (any(is.finite(x) & is.finite(y)))
     {
+        limits <- shared.env$limits[[which.packet]]
         xr <- limits$xlim
         yr <- limits$ylim
-        id <- (x > min(xr) & x < max(xr) & y > min(yr) & y < max(yr))
+        id <- (x > min(xr) & x < max(xr) &
+               y > min(yr) & y < max(yr))
+        ## id <- TRUE
         mosaiq.superpose(x = x[id], y = y[id], groups = groups[id],
                          panel.groups = panel.groups,
                          type = type, 
@@ -200,16 +207,17 @@ prepanel.mosaiq.xyplot <- function(..., give.limits)
 
 panel.mosaiq.qqmath <-
     function(panel.vars = list(x = NULL, groups = NULL),
-             packet,
-             limits = NULL,
+             which.packet, packets,
              data,
              enclos,
              give.limits = FALSE,
              ...,
              qtype = 7,
              f.value = NULL,
-             distribution = qnorm)
+             distribution = qnorm,
+             shared.env)
 {
+    packet <- packets[[which.packet]]
     x <- evaluate(panel.vars$x, data = data, subset = packet, enclos = enclos)
     if (is.null(x)) stop("'x' cannot be NULL")
     x <- as.numeric(x)
@@ -248,6 +256,8 @@ panel.mosaiq.qqmath <-
             ans
         }
     if (give.limits) return(with(xy, default.limits(x, y)))
+    ## else
+    limits <- shared.env$limits[[which.packet]]
     xr <- limits$xlim
     yr <- limits$ylim
     id <- with(xy, (x > min(xr) & x < max(xr) &
@@ -289,8 +299,7 @@ hist.constructor <-
 
 panel.mosaiq.histogram <-
     function(panel.vars = list(x = NULL),
-             packet,
-             limits = NULL,
+             which.packet, packets,
              data,
              enclos,
              give.limits = FALSE,
@@ -300,8 +309,10 @@ panel.mosaiq.histogram <-
              fill = theme$polygon$fill[1],
              breaks = NULL, equal.widths = TRUE,
              nint = round(log2(length(x)) + 1),
-             type = c("density", "count", "percent"))
+             type = c("density", "count", "percent"),
+             shared.env)
 {
+    packet <- packets[[which.packet]]
     xorig <- evaluate(panel.vars$x,
                       data = data, subset = packet,
                       enclos = enclos)
@@ -338,6 +349,8 @@ panel.mosaiq.histogram <-
             }
             return (ans)
         }
+        ## else
+        limits <- shared.env$limits[[which.packet]]
         xr <- limits$xlim
         yr <- limits$ylim
         if (nb > 1)
@@ -364,14 +377,16 @@ prepanel.mosaiq.histogram <- function(..., give.limits)
 
 panel.mosaiq.dotplot <-
     function(panel.vars = list(x = NULL, y = NULL, groups = NULL),
-             packet, data, enclos,
+             which.packet, packets,
+             data, enclos,
              give.limits = FALSE,
              ...,
              theme = mosaiq.theme(),
              col = theme$dot.symbol$col,
              fill = theme$dot.symbol$fill,
              ## col.ref = theme$dot.line$col,
-             horizontal = TRUE)
+             horizontal = TRUE,
+             shared.env)
 {
     col.ref <- theme$dot.line$col
     if (give.limits)
@@ -403,8 +418,7 @@ prepanel.mosaiq.dotplot <- function(..., give.limits)
 
 panel.mosaiq.bwplot <-
     function(panel.vars = list(x = NULL, y = NULL, groups = NULL),
-             packet,
-             limits = NULL,
+             which.packet, packets,
              data,
              enclos,
              give.limits = FALSE,
@@ -419,8 +433,10 @@ panel.mosaiq.bwplot <-
              notch = FALSE,
              notch.frac = 0.5,
              horizontal = FALSE,
-             box.ratio = 1, box.width = box.ratio / (1 + box.ratio))
+             box.ratio = 1, box.width = box.ratio / (1 + box.ratio),
+             shared.env)
 {
+    packet <- packets[[which.packet]]
     x <- evaluate(panel.vars$x,
                   data = data, subset = packet,
                   enclos = enclos)

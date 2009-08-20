@@ -50,16 +50,16 @@ create.panels.new <-
                                  paintFun <- function(item, painter, exposed)
                                  {
                                      limits <- shared.env$limits
-                                     ## str(limits[[i]])
-                                     qlimits(item) <- qrect(limits[[i]]$xlim, limits[[i]]$ylim)
-                                     ## str(qlimits(item))
-                                     panel.fun(packet = packets[[i]],
-                                               limits = limits[[i]],
+                                     qlimits(item) <- qrect(limits[[i]]$xlim,
+                                                            limits[[i]]$ylim)
+                                     panel.fun(which.packet = i,
+                                               packets = packets,
                                                ...,
+                                               panel.env = panel.env,
+                                               shared.env = shared.env,
                                                item = item,
                                                painter = painter,
-                                               exposed = exposed,
-                                               panel.env = panel.env)
+                                               exposed = exposed)
                                  }
                                  panel.layer <- qlayer(panel.toplayer, paintFun = paintFun)
                                  qlimits(panel.layer) <- qrect(limits[[i]]$xlim, limits[[i]]$ylim)
@@ -68,10 +68,32 @@ create.panels.new <-
                                  z <<- z + 1
                              })
                    })
-                box.layer <- qlayer(panel.toplayer, paintFun = panel.box())
+                box.layer <-
+                    qlayer(panel.toplayer,
+                           paintFun = panel.box())
                 qcacheMode(box.layer) <- "none"
                 qsetZValue(box.layer, z)
                 qsetItemFlags(box.layer, "clipsToShape", FALSE)
+                ## zoom in/out with mouse wheel
+
+                wheel.fun <- mosaiq.zoom
+                local(
+                  {
+                      i <- i # make local copy, used on repaint
+                      wheelFun <- function(event)
+                      {
+                          wheel.fun(which.packet = i,
+                                    packet = packets,
+                                    ...,
+                                    shared.env = shared.env,
+                                    event = event)
+                      }
+                      panel.layer <- qlayer(panel.toplayer, wheelFun = wheelFun)
+                      ## qcacheMode(panel.layer) <- "none"
+                      qsetZValue(panel.layer, z)
+                      z <<- z + 1
+                  })
+                
                 ## return container layer (to be placed in a layout)
                 panel.toplayer
             }

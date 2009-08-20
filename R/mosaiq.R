@@ -147,8 +147,8 @@ mosaiq <-
     ## create 'full' widget with page and associated labels.
     ans <- qwidget()
     lans <- qlayout(NULL)
-    lans$margin <- 0
-    lans$spacing <- 0
+    ##lans$margin <- 0
+    ##lans$spacing <- 0
     qsetLayout(ans, lans)
     lans$margin <- outer.padding
 

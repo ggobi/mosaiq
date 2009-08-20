@@ -139,6 +139,7 @@ mosaiq.points <-
              pch = qpathCircle(0, 0, 5),
              cex = 1, col = "black", fill = "transparent", ..., painter)
 {
+    qantialias(painter) <- FALSE ## FIXME: temporary
     xy <- xy.coords(x, y, recycle = TRUE)
     x <- xy$x
     y <- xy$y

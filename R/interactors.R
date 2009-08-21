@@ -30,6 +30,21 @@ mosaiq.zoom <- function(which.packet,
     }
     if (is(shared.env$widget, "QWidget"))
     {
-        qupdate(shared.env$widget)
+        updateLayerLimits(shared.env)
+        ## qupdate(shared.env$widget)
     }
+}
+
+updateLayerLimits <- function(env)
+{
+    ## take all registered layer environments in env and update their
+    ## limits
+
+    limits <- env$limits
+    lapply(env$layer.envs,
+           function(x) {
+               qlimits(x$panel.layer) <-
+                   qrect(limits[[x$i]]$xlim,
+                         limits[[x$i]]$ylim)
+           })
 }

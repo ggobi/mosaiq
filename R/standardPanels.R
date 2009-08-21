@@ -190,7 +190,7 @@ panel.mosaiq.xyplot <-
         xr <- limits$xlim
         yr <- limits$ylim
         id <- (x > min(xr) & x < max(xr) &
-               y > min(yr) & y < max(yr))
+              y > min(yr) & y < max(yr))
         ## id <- TRUE
         mosaiq.superpose(x = x[id], y = y[id], groups = groups[id],
                          panel.groups = panel.groups,

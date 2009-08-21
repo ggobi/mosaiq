@@ -5,13 +5,14 @@ library(mosaiq)
 ## export.mosaiq("fig/mosaiq_%03g.png")
 
 mydata <-
-    data.frame(x = 1:1000, y = rnorm(1000),
-               g = gl(3, 1, 1000, labels = month.name[1:3]),
-               a = gl(1, 1000))
+    data.frame(x = 1:10000, y = rnorm(10000),
+               g = gl(3, 1, 10000, labels = month.name[1:3]),
+               a = gl(1, 10000))
 
 mosaiq.xyplot(y ~ x, data = mydata,
-              ## margin = ~a,
-              groups = g,
+              margin = ~g,
+              layout = c(1, 1),
+              ## groups = g,
               grid = TRUE)
 
 myplot <-

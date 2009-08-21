@@ -104,6 +104,7 @@ mosaiq <-
     ## Panel functions (but not prepanel functions) also have access
     ## to a panel-specific environment 'panel.env'
     shared.env <- new.env(parent = emptyenv())
+    shared.env$layer.envs <- list()
 
     relation <- do.call(mosaiq.relation, relation)
     alternating <- do.call(mosaiq.alternating, alternating)
@@ -205,7 +206,7 @@ mosaiq <-
 print.mosaiq <- function(x, row = 1, col = 1, ...)
 {
     widget.index <- sprintf("item:%g,%g", row, col)
-    if (!is.null(.MosaicEnv[[widget.index]])) qclose(.MosaicEnv[[widget.index]])
+    old.widget <- .MosaicEnv[[widget.index]]
     .MosaicEnv[[widget.index]] <- x
     if (is.null(.MosaicEnv$toplevel)) 
     {
@@ -220,6 +221,7 @@ print.mosaiq <- function(x, row = 1, col = 1, ...)
         qaddWidget(.MosaicEnv$toplayout, x, row, col)
     qupdate(.MosaicEnv$toplevel)
     export.mosaiq()
+    if (!is.null(old.widget)) qclose(old.widget)
     invisible(x)
 }
 

@@ -49,9 +49,10 @@ create.panels.new <-
                                  panel.env <- environment() # can be used as panel-specific storage space by panel function
                                  paintFun <- function(item, painter, exposed)
                                  {
-                                     limits <- shared.env$limits
-                                     qlimits(item) <- qrect(limits[[i]]$xlim,
-                                                            limits[[i]]$ylim)
+##                                      limits <- shared.env$limits
+##                                      qlimits(item) <-
+##                                          qrect(limits[[i]]$xlim, ## 
+##                                                limits[[i]]$ylim)
                                      panel.fun(which.packet = i,
                                                packets = packets,
                                                ...,
@@ -66,6 +67,8 @@ create.panels.new <-
                                  qcacheMode(panel.layer) <- "none"
                                  qsetZValue(panel.layer, z)
                                  z <<- z + 1
+                                 shared.env$layer.envs[[ length(shared.env$layer.envs) + 1L ]] <- 
+                                     environment()
                              })
                    })
                 box.layer <-

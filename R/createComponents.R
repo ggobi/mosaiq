@@ -67,8 +67,7 @@ create.panels.new <-
                                  qcacheMode(panel.layer) <- "none"
                                  qsetZValue(panel.layer, z)
                                  z <<- z + 1
-                                 shared.env$layer.envs[[ length(shared.env$layer.envs) + 1L ]] <- 
-                                     environment()
+                                 registerLayerEnv(shared.env, environment())
                              })
                    })
                 box.layer <-
@@ -215,17 +214,47 @@ create.axis <-
         i <- layout[p]
         if (i > 0)
             ans[[p]] <-
-                switch(which,
-                       x = qxaxis(limits[[i]]$xlim,
-                                  side = side,
-                                  at = limits[[i]]$xat,
-                                  labels = limits[[i]]$xlabels,
-                                  font = font),
-                       y = qyaxis(limits[[i]]$ylim,
-                                  side = side,
-                                  at = limits[[i]]$yat,
-                                  labels = limits[[i]]$ylabels,
-                                  font = font))
+                local(
+                  {
+                      # make local copy, used on repaint
+                      side <- side
+                      i <- i 
+                      paintFun <-
+                          switch(side,
+                                 top = ,
+                                 bottom = function(item, painter, exposed) {
+                                     ## str(list(exposed[, 1], side, limits[[i]]$xat))
+                                     qxaxis(exposed[, 1],  #limits[[i]]$xlim,
+                                            side = side,
+                                            at = limits[[i]]$xat,
+                                            labels = limits[[i]]$xlabels,
+                                            font = font,
+                                            item = item, painter = painter, exposed = exposed)
+                                 },
+                                 left = ,
+                                 right = function(item, painter, exposed) {
+                                     qyaxis(exposed[, 2],  #limits[[i]]$ylim,
+                                            side = side,
+                                            at = limits[[i]]$yat,
+                                            labels = limits[[i]]$ylabels,
+                                            font = font,
+                                            item = item, painter = painter, exposed = exposed)
+                                 })
+
+
+                      axis.layer <- qlayer(NULL, paintFun = paintFun)
+                      qlimits(axis.layer) <-
+                          switch(side,
+                                 top = qrect(limits[[i]]$xlim, c(-0.3, 1)),
+                                 bottom = qrect(limits[[i]]$xlim, c(0, 1.3)),
+                                 left = ,
+                                 right = qrect(c(0, 1), limits[[i]]$ylim))
+                      qminimumSize(axis.layer) <- qsize(20, 20)
+                      qcacheMode(axis.layer) <- "none"
+                      qsetItemFlags(axis.layer, "clipsToShape", FALSE)
+                      registerLayerEnv(shared.env, environment())
+                      axis.layer
+                  })
     }
     ans
 }

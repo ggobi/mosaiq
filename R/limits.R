@@ -32,11 +32,12 @@ combine.limits <-
     ## combined.
 
     xat <- unlist(lapply(limits, "[[", "xat"))
-    if (is.null(xat))
+    if (is.null(xat)) ## numeric: leave alone for auto-generation later
     {
         if (is.null(xlim)) xlim <- extendrange(unlist(lapply(limits, "[[", "xlim")))
-        xat <- pretty(xlim, tick.number)
-        xlabels <- format(xat)
+        ## xat <- pretty(xlim, tick.number)
+        ## xlabels <- format(xat)
+        xlabels <- NULL
     }
     else # factor? (not necessarily; e.g., date-time, explicit specification)
     {
@@ -50,8 +51,9 @@ combine.limits <-
     if (is.null(yat))
     {
         if (is.null(ylim)) ylim <- extendrange(unlist(lapply(limits, "[[", "ylim")))
-        yat <- pretty(ylim, tick.number)
-        ylabels <- format(yat)
+        ## yat <- pretty(ylim, tick.number)
+        ## ylabels <- format(yat)
+        ylabels <- NULL
     }
     else 
     {
@@ -77,8 +79,8 @@ combine.limits <-
             if (is.null(limits[[i]][["xat"]]))
             {
                 limits[[i]][["xlim"]] <- extendrange(limits[[i]][["xlim"]])
-                limits[[i]][["xat"]] <- pretty(limits[[i]][["xlim"]], tick.number)
-                limits[[i]][["xlabels"]] <- format(limits[[i]][["xat"]])
+                ## limits[[i]][["xat"]] <- pretty(limits[[i]][["xlim"]], tick.number)
+                ## limits[[i]][["xlabels"]] <- format(limits[[i]][["xat"]])
             }
             else 
             {
@@ -102,8 +104,8 @@ combine.limits <-
             if (is.null(limits[[i]][["yat"]]))
             {
                 limits[[i]][["ylim"]] <- extendrange(limits[[i]][["ylim"]])
-                limits[[i]][["yat"]] <- pretty(limits[[i]][["ylim"]], tick.number)
-                limits[[i]][["ylabels"]] <- format(limits[[i]][["yat"]])
+                ## limits[[i]][["yat"]] <- pretty(limits[[i]][["ylim"]], tick.number)
+                ## limits[[i]][["ylabels"]] <- format(limits[[i]][["yat"]])
             }
             else 
             {

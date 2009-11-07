@@ -35,6 +35,12 @@ mosaiq.zoom <- function(which.packet,
     }
 }
 
+registerLayerEnv <- function(env, layerenv)
+{
+    env$layer.envs[[ length(env$layer.envs) + 1L ]] <- layerenv
+}
+
+
 updateLayerLimits <- function(env)
 {
     ## take all registered layer environments in env and update their
@@ -43,8 +49,21 @@ updateLayerLimits <- function(env)
     limits <- env$limits
     lapply(env$layer.envs,
            function(x) {
-               qlimits(x$panel.layer) <-
-                   qrect(limits[[x$i]]$xlim,
-                         limits[[x$i]]$ylim)
+               if (!is.null(x$panel.layer))
+                   qlimits(x$panel.layer) <-
+                       qrect(limits[[x$i]]$xlim,
+                             limits[[x$i]]$ylim)
+               if (!is.null(x$axis.layer))
+               {
+                   cl <- qlimits(x$axis.layer)
+                   qlimits(x$axis.layer) <-
+                       switch(x$side,
+                              top = ,
+                              bottom = qrect(limits[[x$i]]$xlim,
+                                             cl[, 2]),
+                              left = ,
+                              right = qrect(cl[, 1],
+                                             limits[[x$i]]$ylim))
+               }
            })
 }

@@ -45,7 +45,7 @@ Ideas:
 
  * High-level function calls could be of the form
 
-     qvplot(data = environment(), enclos = .GlobalEnv,
+     mosaiq(data = environment(), enclos = .GlobalEnv,
             margin.vars = list(a = expression(a), b = expression(b)),
             packets = packets(margin.vars, data),
 

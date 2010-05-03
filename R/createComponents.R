@@ -36,7 +36,8 @@ create.panels.new <-
             {
                 if (!is.list(panel)) panel <- list(panel)
                 panel.toplayer <- qlayer(NULL)
-                qminimumSize(panel.toplayer) <- qsize(20, 20)
+                ## qminimumSize(panel.toplayer) <- qsize(20, 20)
+                #FIXME panel.toplayer$setMinimumSize(qsize(20, 20))
                 qcacheMode(panel.toplayer) <- "none"
                 z <- 1
                 ## for (panel.fun in panel) # doesn't work
@@ -151,7 +152,8 @@ create.panels.old <-
                              qlimits(panel.layer) <-
                                  qrect(limits[[i]]$xlim, limits[[i]]$ylim)
                              qcacheMode(panel.layer) <- "none"
-                             qminimumSize(panel.layer) <- qsize(20, 20)
+                             ## qminimumSize(panel.layer) <- qsize(20, 20)
+                             #FIXME panel.layer$setMinimumSize(qsize(20, 20))
                              panel.layer
                          })
                    })

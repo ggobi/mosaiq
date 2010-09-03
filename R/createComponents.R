@@ -38,8 +38,6 @@ create.panels.new <-
                 panel.toplayer <- qlayer(NULL)
                 ## qminimumSize(panel.toplayer) <- qsize(20, 20)
                 #FIXME panel.toplayer$setMinimumSize(qsize(20, 20))
-                qcacheMode(panel.toplayer) <- "none"
-                z <- 1
                 ## for (panel.fun in panel) # doesn't work
                 lapply(panel, function(panel.fun)
                    {
@@ -63,20 +61,16 @@ create.panels.new <-
                                                painter = painter,
                                                exposed = exposed)
                                  }
-                                 panel.layer <- qlayer(panel.toplayer, paintFun = paintFun)
-                                 qlimits(panel.layer) <- qrect(limits[[i]]$xlim, limits[[i]]$ylim)
-                                 qcacheMode(panel.layer) <- "none"
-                                 qsetZValue(panel.layer, z)
-                                 z <<- z + 1
+                                 panel.layer <-
+                                   qlayer(panel.toplayer, paintFun = paintFun,
+                                          limits = qrect(limits[[i]]$xlim,
+                                            limits[[i]]$ylim))
                                  registerLayerEnv(shared.env, environment())
                              })
                    })
                 box.layer <-
                     qlayer(panel.toplayer,
                            paintFun = panel.box())
-                qcacheMode(box.layer) <- "none"
-                qsetZValue(box.layer, z)
-                qsetItemFlags(box.layer, "clipsToShape", FALSE)
                 ## zoom in/out with mouse wheel
 
                 wheel.fun <- mosaiq.zoom
@@ -92,9 +86,6 @@ create.panels.new <-
                                     event = event)
                       }
                       panel.layer <- qlayer(panel.toplayer, wheelFun = wheelFun)
-                      ## qcacheMode(panel.layer) <- "none"
-                      qsetZValue(panel.layer, z)
-                      z <<- z + 1
                   })
                 
                 ## return container layer (to be placed in a layout)
@@ -244,16 +235,15 @@ create.axis <-
                                  })
 
 
-                      axis.layer <- qlayer(NULL, paintFun = paintFun)
-                      qlimits(axis.layer) <-
-                          switch(side,
-                                 top = qrect(limits[[i]]$xlim, c(-0.3, 1)),
-                                 bottom = qrect(limits[[i]]$xlim, c(0, 1.3)),
-                                 left = ,
-                                 right = qrect(c(0, 1), limits[[i]]$ylim))
-                      qminimumSize(axis.layer) <- qsize(20, 20)
-                      qcacheMode(axis.layer) <- "none"
-                      qsetItemFlags(axis.layer, "clipsToShape", FALSE)
+                      limits <-
+                        switch(side,
+                               top = qrect(limits[[i]]$xlim, c(-0.3, 1)),
+                               bottom = qrect(limits[[i]]$xlim, c(0, 1.3)),
+                               left = ,
+                               right = qrect(c(0, 1), limits[[i]]$ylim))
+                      axis.layer <- qlayer(NULL, paintFun = paintFun,
+                                           limits = limits)
+                      axis.layer$minimumSize <- qsize(20, 20)
                       registerLayerEnv(shared.env, environment())
                       axis.layer
                   })
@@ -316,7 +306,7 @@ create.page <-
         yaxis.right.column <- integer(0)
     }
 
-    scene <- qgraphicsScene()
+    scene <- qscene()
     root <- qlayer(scene)
 
     checkAndAdd <- function(x, layer, i, j,
@@ -324,9 +314,10 @@ create.page <-
     {
         if (is(layer, "QViz::RLayer"))
         {
-            qaddItem(x, layer, i, j)
-            qrowStretch(layer) <- rowstretch
-            qcolStretch(layer) <- colstretch
+          layout <- x$gridLayout()
+          layout$addItem(layer, i, j)
+          layout$setRowStretchFactor(i, rowstretch)
+          layout$setColStretchFactor(i, colstretch)
         }
     }
 
@@ -445,16 +436,16 @@ create.page.QWidget <-
         yaxis.left.column <- seq_len(ldim[1])
         yaxis.right.column <- integer(0)
     }
-    container <- qwidget()
-    l <- qlayout(NULL)
+    container <- Qt$QWidget()
+    l <- Qt$QLayout(NULL)
     l$margin <- 0
     l$spacing <- 0
-    qsetLayout(container, l)
+    container$setLayout(l)
 
     checkAndAdd <- function(layout, widget, i, j)
     {
         if (is(widget, "QWidget"))
-            qaddWidget(layout, widget, i, j)
+            layout$addWidget(widget, i, j)
     }
 
     ## panels

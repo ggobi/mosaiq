@@ -5,13 +5,10 @@ labelLayer <- function(s, rot = 0,
     force(s)
     ## container layer
     toplayer <- qlayer(NULL)
-    qminimumSize(toplayer) <- qsize(15, 15)
+    toplayer$minimumSize <- qsize(15, 15)
     ## background box (unclipped)
     box.layer <- qlayer(toplayer, paintFun = panel.box(col = col, fill = fill))
-    qcacheMode(box.layer) <- "none"
-    qsetItemFlags(box.layer, "clipsToShape", FALSE)
-    qminimumSize(box.layer) <- qsize(15, 15)
-    qsetZValue(box.layer, 0)
+    box.layer$minimumSize <- qsize(15, 15)
     ## text label (clipped)
     paintFun <- function(item, painter, exposed)
     {
@@ -19,12 +16,9 @@ labelLayer <- function(s, rot = 0,
                   halign = "center", valign = "center",
                   rot = rot)
     }
-    label.layer <- qlayer(toplayer, paintFun)
-    qlimits(label.layer) <- qrect(c(0, 1), c(0, 1))
-    qminimumSize(label.layer) <- qsize(15, 15)
-    qcacheMode(label.layer) <- "none"
-    qsetItemFlags(label.layer, "clipsToShape", TRUE)
-    qsetZValue(label.layer, 1)
+    label.layer <- qlayer(toplayer, paintFun, limits = qrect(c(0, 1), c(0, 1)),
+                          clip = TRUE)
+    label.layer$minimumSize <- qsize(15, 15)
     ## return container layer
     toplayer
 }
@@ -34,7 +28,7 @@ labelWidget <-
     function(s, horizontal = TRUE, 
              col = "transparent", fill = "transparent")
 {
-    ans <- qlabel(s)
+    ans <- Qt$QLabel(s)
     ans$alignment <- 132
     ans
 }
@@ -150,7 +144,7 @@ qyaxis <-
     ## qlimits(axis.layer) <- qrect(c(0, 1), ylim)
     ## qcacheMode(axis.layer) <- "none"
     ## qsetItemFlags(axis.layer, "clipsToShape", FALSE)
-    qminimumSize(item) <- qsize(minwidth, 20)
+    item$minimumSize <- qsize(minwidth, 20)
     ## axis.layer
 }
 

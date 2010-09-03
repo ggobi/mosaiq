@@ -82,7 +82,7 @@ mosaiq.legend <-
                },
                simplify = FALSE)
     textComps <-
-        lapply(text, qlabel, font = do.call(qv.font, font),
+        lapply(text, Qt$QLabel, font = do.call(qv.font, font),
                xexpand = FALSE, yexpand = FALSE)
     otherComps <- vector(mode = "list", length = length(pars))
     names(otherComps) <- nmdots
@@ -94,7 +94,7 @@ mosaiq.legend <-
     }
     allComps <- do.call(cbind, c(list(text = textComps), otherComps))
     key <- qvBasicWidget(xexpand = FALSE, yexpand = FALSE)
-    if (is.character(title)) key[1, 1, 1, ncol(allComps)] <- qlabel(title[1], xexpand = FALSE, yexpand = FALSE)
+    if (is.character(title)) key[1, 1, 1, ncol(allComps)] <- Qt$QLabel(title[1], xexpand = FALSE, yexpand = FALSE)
     for (i in seq_len(nrow(allComps)))
         for (j in seq_len(ncol(allComps)))
         {

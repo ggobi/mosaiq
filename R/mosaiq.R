@@ -146,44 +146,36 @@ mosaiq <-
                relation = relation, alternating = alternating)
 
     ## create 'full' widget with page and associated labels.
-    ans <- qwidget()
-    lans <- qlayout(NULL)
+    ans <- Qt$QWidget()
+    lans <- Qt$QLayout(NULL)
     ##lans$margin <- 0
     ##lans$spacing <- 0
-    qsetLayout(ans, lans)
+    ans$setLayout(lans)
     lans$margin <- outer.padding
 
     ## ans <- qvBasicWidget(canvas = theme$background$col, margin = ) # imagine a 9x9 layout
 
     if (length(pageWidgets) > 1) 
     {
-        tabw <- qtabWidget()
+        tabw <- Qt$QTabWidget()
         for (i in seq_len(length(pageWidgets)))
         {
             if (is(pageWidgets[[i]], "QWidget"))
-                qaddTab(tabw, pageWidgets[[i]], label = sprintf("Page %g", i))
+                tabw$addTab(pageWidgets[[i]], label = sprintf("Page %g", i))
         }
-        qaddWidget(lans, tabw, 5, 5)
+        lans$addWidget(tabw, 5, 5)
     }
     else if (is(pageWidgets[[1]], "QWidget"))
-        qaddWidget(lans, pageWidgets[[1]], 5, 5)
+        lans$addWidget(pageWidgets[[1]], 5, 5)
 
     if (!is.null(xlab))
-        qaddWidget(lans, 
-                   labelWidget(xlab, horizontal = TRUE),
-                   6, 5)
+        lans$addWidget(lans, labelWidget(xlab, horizontal = TRUE), 6, 5)
     if (!is.null(ylab))
-        qaddWidget(lans, 
-                   labelWidget(ylab, horizontal = FALSE),
-                   5, 4)
+        lans$addWidget(labelWidget(ylab, horizontal = FALSE), 5, 4)
     if (!is.null(main))
-        qaddWidget(lans, 
-                   labelWidget(main, horizontal = TRUE),
-                   1, 1, 1, 9)
+        lans$addWidget(lans, labelWidget(main, horizontal = TRUE), 1, 1, 1, 9)
     if (!is.null(sub)) 
-        qaddWidget(lans, 
-                   labelWidget(sub, horizontal = TRUE),
-                   9, 1, 1, 9)
+        lans$qaddWidget(lans, labelWidget(sub, horizontal = TRUE), 9, 1, 1, 9)
 ##     if (!is.null(legend)) 
 ##     {
 ##         for (space in names(legend))
@@ -210,18 +202,18 @@ print.mosaiq <- function(x, row = 1, col = 1, ...)
     .MosaicEnv[[widget.index]] <- x
     if (is.null(.MosaicEnv$toplevel)) 
     {
-        .MosaicEnv$toplevel <- qwidget()
-        .MosaicEnv$toplayout <- qlayout()
-        qsetLayout(.MosaicEnv$toplevel, .MosaicEnv$toplayout)
+        .MosaicEnv$toplevel <- Qt$QWidget()
+        .MosaicEnv$toplayout <- Qt$QLayout()
+        .MosaicEnv$toplevel$setLayout(.MosaicEnv$toplayout)
         .MosaicEnv$toplevel$styleSheet <- " QWidget { background: white }"
-        qresize(.MosaicEnv$toplevel, 800, 600)
-        qshow(.MosaicEnv$toplevel)
+        .MosaicEnv$toplevel$resize(800, 600)
+        .MosaicEnv$toplevel$show()
     }
     if (is(x, "QWidget"))
-        qaddWidget(.MosaicEnv$toplayout, x, row, col)
-    qupdate(.MosaicEnv$toplevel)
+        .MosaicEnv$toplayout$addWidget(x, row, col)
+    .MosaicEnv$toplevel$update()
     export.mosaiq()
-    if (!is.null(old.widget)) qclose(old.widget)
+    if (!is.null(old.widget)) old.widget$close()
     invisible(x)
 }
 

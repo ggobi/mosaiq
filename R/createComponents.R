@@ -62,9 +62,9 @@ create.panels.new <-
                                                exposed = exposed)
                                  }
                                  panel.layer <-
-                                   qlayer(panel.toplayer, paintFun = paintFun,
-                                          limits = qrect(limits[[i]]$xlim,
-                                            limits[[i]]$ylim))
+                                     qlayer(panel.toplayer, paintFun = paintFun,
+                                            limits = qrect(limits[[i]]$xlim,
+                                                           limits[[i]]$ylim))
                                  registerLayerEnv(shared.env, environment())
                              })
                    })
@@ -312,7 +312,7 @@ create.page <-
     checkAndAdd <- function(x, layer, i, j,
                             colstretch = 0, rowstretch = 0)
     {
-        if (is(layer, "QViz::RLayer"))
+        if (is(layer, "Qanviz::RLayer"))
         {
           layout <- x$gridLayout()
           layout$addItem(layer, i, j)
@@ -393,9 +393,8 @@ create.page <-
     ## container
 
     view <- qplotView(scene = scene, opengl = FALSE)
-    view$focusPolicy <- 0
+    ## view$focusPolicy <- 0
     view
-
 }
 
 

@@ -147,7 +147,7 @@ mosaiq <-
 
     ## create 'full' widget with page and associated labels.
     ans <- Qt$QWidget()
-    lans <- Qt$QLayout(NULL)
+    lans <- Qt$QGridLayout(NULL)
     ##lans$margin <- 0
     ##lans$spacing <- 0
     ans$setLayout(lans)
@@ -169,13 +169,13 @@ mosaiq <-
         lans$addWidget(pageWidgets[[1]], 5, 5)
 
     if (!is.null(xlab))
-        lans$addWidget(lans, labelWidget(xlab, horizontal = TRUE), 6, 5)
+        lans$addWidget(labelWidget(xlab, horizontal = TRUE), 6, 5)
     if (!is.null(ylab))
         lans$addWidget(labelWidget(ylab, horizontal = FALSE), 5, 4)
-    if (!is.null(main))
-        lans$addWidget(lans, labelWidget(main, horizontal = TRUE), 1, 1, 1, 9)
+    if (!is.null(main)) 
+        lans$addWidget(labelWidget(main, horizontal = TRUE), 1, 1, 1, 9)
     if (!is.null(sub)) 
-        lans$qaddWidget(lans, labelWidget(sub, horizontal = TRUE), 9, 1, 1, 9)
+        lans$qaddWidget(labelWidget(sub, horizontal = TRUE), 9, 1, 1, 9)
 ##     if (!is.null(legend)) 
 ##     {
 ##         for (space in names(legend))
@@ -203,7 +203,7 @@ print.mosaiq <- function(x, row = 1, col = 1, ...)
     if (is.null(.MosaicEnv$toplevel)) 
     {
         .MosaicEnv$toplevel <- Qt$QWidget()
-        .MosaicEnv$toplayout <- Qt$QLayout()
+        .MosaicEnv$toplayout <- Qt$QGridLayout()
         .MosaicEnv$toplevel$setLayout(.MosaicEnv$toplayout)
         .MosaicEnv$toplevel$styleSheet <- " QWidget { background: white }"
         .MosaicEnv$toplevel$resize(800, 600)

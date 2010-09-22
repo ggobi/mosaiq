@@ -14,7 +14,7 @@ xtabs( ~ score, data = Chem97)
 ## Figure 1.1
 ## histogram(~ gcsescore | factor(score), data = Chem97)
 
-mosaiq.histogram(gcsescore, data = Chem97, margin = ~factor(score))
+p <- mosaiq.histogram(gcsescore, data = Chem97, margin = ~factor(score))
 
 
 ## Figure 1.2

@@ -136,7 +136,7 @@ mosaiq.lmline <- function(x, y, ...)
 mosaiq.points <-
     function(x, y = NULL, type = "p", jitter.x = FALSE, jitter.y = FALSE,
              factor = 0.5, amount = NULL, horizontal = FALSE,
-             pch = qpathCircle(0, 0, 5),
+             pch = qglyphCircle(5),
              cex = 1, col = "black", fill = "transparent", ..., painter)
 {
     qantialias(painter) <- FALSE ## FIXME: temporary

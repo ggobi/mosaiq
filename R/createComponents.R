@@ -314,10 +314,11 @@ create.page <-
     {
         if (is(layer, "Qanviz::RLayer"))
         {
-          layout <- x$gridLayout()
-          layout$addItem(layer, i, j)
-          layout$setRowStretchFactor(i, rowstretch)
-          layout$setColStretchFactor(i, colstretch)
+            x[i, j] <- layer
+            layout <- x$gridLayout()
+            ## layout$addItem(layer, i, j)
+            layout$setRowStretchFactor(i, rowstretch)
+            layout$setColumnStretchFactor(j, colstretch)
         }
     }
 

@@ -3,23 +3,22 @@ labelLayer <- function(s, rot = 0,
                        col = "black", fill = "transparent")
 {
     force(s)
-    ## container layer
+    ## container layer, contains border (unclipped) and text (clipped)
     toplayer <- qlayer(NULL)
-    toplayer$minimumSize <- qsize(15, 15)
-    ## background box (unclipped)
-    box.layer <- qlayer(toplayer, paintFun = panel.box(col = col, fill = fill))
-    box.layer$minimumSize <- qsize(15, 15)
-    ## text label (clipped)
+    toplayer$minimumSize <- qsize(0, 15)
+    border.layer <-
+        qlayer(toplayer,
+               paintFun = boxPaintFun(col = col, fill = fill))
     paintFun <- function(item, painter, exposed)
     {
+        print(qtextExtents(painter, s))
         qdrawText(painter, as.character(s), 0.5, 0.5,
                   halign = "center", valign = "center",
                   rot = rot)
     }
-    label.layer <- qlayer(toplayer, paintFun, limits = qrect(c(0, 1), c(0, 1)),
+    label.layer <- qlayer(toplayer, paintFun,
+                          limits = qrect(c(0, 1), c(0, 1)),
                           clip = TRUE)
-    label.layer$minimumSize <- qsize(15, 15)
-    ## return container layer
     toplayer
 }
 
@@ -29,32 +28,10 @@ labelWidget <-
              col = "transparent", fill = "transparent")
 {
     ans <- Qt$QLabel(s)
-    ans$alignment <- 132
+    ans$alignment <- Qt$Qt$AlignHCenter | Qt$Qt$AlignVCenter
     ans
 }
 
-
-
-## labelWidget <-
-##     function(s, horizontal = TRUE, 
-##              col = "transparent", fill = "transparent")
-## {
-##     rot <- if (horizontal) 0 else 90
-##     scene <- qgraphicsScene()
-##     root <- qlayer(scene)
-##     layer <- labelLayer(s, rot = rot,
-##                         col = "green", fill = fill)
-    
-##     qaddItem(root, layer, 0, 0)
-##     qrowStretch(layer) <- as.integer(!horizontal)
-##     qcolStretch(layer) <- as.integer(horizontal)
-##     view <- qplotView(scene = scene, opengl = FALSE)
-##     view$focusPolicy <- 0
-##     ## qsetExpanding(view, vertical = !horizontal, horizontal = horizontal)
-##     qsetExpanding(view, vertical = FALSE, horizontal = FALSE)
-##     view$size <- qpoint(20, 20)
-##     view
-## }
 
 
 

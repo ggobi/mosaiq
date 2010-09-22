@@ -1,15 +1,6 @@
 
 
-## panel.box <- function(item, painter, exposed, ...)
-## {
-##     cl <- list(xlim = exposed[, 1], ylim = exposed[, 2])
-##     const <- 0
-##     mosaiq.rect(cl$xlim[1]+const, cl$ylim[1]+const,
-##                 cl$xlim[2]-const, cl$ylim[2]-const, 
-##                 col = "black", fill = "transparent", painter = painter)
-## }
-
-panel.box <- function(col = "black", fill = "transparent",...)
+boxPaintFun <- function(col = "black", fill = "transparent",...)
 {
     function(item, painter, exposed)
     {
@@ -70,7 +61,7 @@ create.panels.new <-
                    })
                 box.layer <-
                     qlayer(panel.toplayer,
-                           paintFun = panel.box())
+                           paintFun = boxPaintFun())
                 ## zoom in/out with mouse wheel
 
                 wheel.fun <- mosaiq.zoom
@@ -124,7 +115,8 @@ create.panels.old <-
                              paintFun <- function(item, painter, exposed)
                              {
                                  ## message("i is ", i)
-                                 cl <- list(xlim = exposed[, 1], ylim = exposed[, 2])
+                                 e <- as.matrix(exposed)
+                                 cl <- list(xlim = e[, 1], ylim = e[, 2])
                                  const <- 0
                                  panel.fun(panel.vars = panel.vars,
                                            packet = packets[[i]],
@@ -216,8 +208,10 @@ create.axis <-
                           switch(side,
                                  top = ,
                                  bottom = function(item, painter, exposed) {
+                                     str(limits[[i]])
                                      ## str(list(exposed[, 1], side, limits[[i]]$xat))
-                                     qxaxis(exposed[, 1],  #limits[[i]]$xlim,
+                                     e <- as.matrix(exposed)
+                                     qxaxis(e[, 1],  #limits[[i]]$xlim,
                                             side = side,
                                             at = limits[[i]]$xat,
                                             labels = limits[[i]]$xlabels,
@@ -226,7 +220,9 @@ create.axis <-
                                  },
                                  left = ,
                                  right = function(item, painter, exposed) {
-                                     qyaxis(exposed[, 2],  #limits[[i]]$ylim,
+                                     str(limits[[i]])
+                                     e <- as.matrix(exposed)
+                                     qyaxis(e[, 2],  #limits[[i]]$ylim,
                                             side = side,
                                             at = limits[[i]]$yat,
                                             labels = limits[[i]]$ylabels,

@@ -61,8 +61,8 @@ mosaiq.abline <-
              ...,
              item, painter, exposed)
 {
-    cl <- list(xlim = exposed[, 1],
-               ylim = exposed[, 2])
+    e <- as.matrix(exposed)
+    cl <- list(xlim = e[, 1], ylim = e[, 2])
     if (!is.null(h) || !is.null(v))
     {
         h <- unique(h)
@@ -177,8 +177,8 @@ mosaiq.grid <-
     function(h = 3, v = 3, col = "grey", ...,
              item, painter, exposed)
 {
-    cl <- list(xlim = exposed[, 1],
-               ylim = exposed[, 2])
+    e <- as.matrix(exposed)
+    cl <- list(xlim = e[, 1], ylim = e[, 2])
     h <- h[1]; v <- v[1]
     if (h < 0)
         mosaiq.abline(h = pretty(cl$ylim, n = -h),
@@ -260,15 +260,14 @@ mosaiq.bars <-
              col.ref = theme$reference$col,
              item, painter, exposed)
 {
-    str(list(x, y))
     if (is.null(groups)) groups <- gl(1, length(x))
     groups <- as.factor(groups)
     vals <- levels(groups)
     nvals <- length(vals)
     col <- rep(col, length = nvals)
     fill <- rep(fill, length = nvals)
-    cpl <- list(xlim = exposed[, 1],
-                ylim = exposed[, 2])
+    e <- as.matrix(exposed)
+    cpl <- list(xlim = e[, 1], ylim = e[, 2])
     origin <-
         if (stack) 0
         else if (horizontal)
@@ -405,8 +404,9 @@ mosaiq.fill <-
     function(col = "grey", border = "black", ...,
              item, painter, exposed)
 {
-    cl <- list(xlim = exposed[, 1],
-               ylim = exposed[, 2])
+    e <- as.matrix(exposed)
+    cl <- list(xlim = e[, 1],
+               ylim = e[, 2])
     mosaiq.rect(cl$xlim[1], cl$ylim[1],
                 cl$xlim[2], cl$ylim[2],
                 col = border, fill = col,

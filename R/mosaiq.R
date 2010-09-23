@@ -208,6 +208,41 @@ print.mosaiq <- function(x, row = 1, col = 1, ...)
         .MosaicEnv$toplevel$styleSheet <- " QWidget { background: white }"
         .MosaicEnv$toplevel$resize(800, 600)
         .MosaicEnv$toplevel$show()
+        ## Actions
+        
+        ## Activate context menu with actions
+        .MosaicEnv$toplevel$setContextMenuPolicy(Qt$Qt$ActionsContextMenu)
+
+        ## Helper function to print
+        printHandler <- function()
+        {
+            printer <- Qt$QPrinter(Qt$QPrinter$HighResolution)
+            rpaper <- getOption("papersize")
+            if (is.null(rpaper)) rpaper <- "A4"
+            qtpaper <- names(Qt$QPrinter)
+            usepaper <- qtpaper[ match(tolower(rpaper), tolower(qtpaper)) ]
+            if (is.na(usepaper)) usepaper <- "A4"
+            printer$setPageSize(Qt$QPrinter[[usepaper]])
+            pd <- Qt$QPrintDialog(printer)
+            acceptPrint <- pd$exec()
+            if (acceptPrint)
+            {
+                painter <- Qt$QPainter()
+                painter$begin(printer)
+                .MosaicEnv$toplevel$render(painter)
+                painter$end()
+            }
+        }
+        
+        ## Actions to print
+        printAct <- Qt$QAction("Print", .MosaicEnv$toplevel)
+        printAct$setShortcut(Qt$QKeySequence("Ctrl+P"))
+        qconnect(printAct,
+                 signal = "triggered",
+                 handler = function(checked) {
+                     printHandler()
+                 })
+        .MosaicEnv$toplevel$addAction(printAct)
     }
     if (is(x, "QWidget"))
         .MosaicEnv$toplayout$addWidget(x, row, col)

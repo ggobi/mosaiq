@@ -5,18 +5,20 @@ labelLayer <- function(s, rot = 0,
     force(s)
     ## container layer, contains border (unclipped) and text (clipped)
     toplayer <- qlayer(NULL)
-    toplayer$minimumSize <- qsize(0, 15)
+    toplayer$minimumSize <- qsize(0, 20)
     border.layer <-
         qlayer(toplayer,
-               paintFun = boxPaintFun(col = col, fill = fill))
-    paintFun <- function(item, painter, exposed)
+               paintFun = boxPaintFun(col = col, fill = fill), clip = FALSE)
+    labelPaintFun <- function(item, painter, exposed)
     {
-        print(qtextExtents(painter, s))
+        ## te <- qtextExtents(painter, s)[1, c("y0", "y1")]
+        ## toplayer$minimumSize <<- qsize(0, 1.8 * diff(te))
         qdrawText(painter, as.character(s), 0.5, 0.5,
                   halign = "center", valign = "center",
                   rot = rot)
     }
-    label.layer <- qlayer(toplayer, paintFun,
+    ## FIXME: use sizeHintFun to specify size?
+    label.layer <- qlayer(toplayer, labelPaintFun,
                           limits = qrect(c(0, 1), c(0, 1)),
                           clip = TRUE)
     toplayer
@@ -28,7 +30,7 @@ labelWidget <-
              col = "transparent", fill = "transparent")
 {
     ans <- Qt$QLabel(s)
-    ans$alignment <- Qt$Qt$AlignHCenter | Qt$Qt$AlignVCenter
+    ans$setAlignment(Qt$Qt$AlignHCenter | Qt$Qt$AlignVCenter)
     ans
 }
 
@@ -36,7 +38,7 @@ labelWidget <-
 
 
 
-qxaxis <-
+qxaxisPaintFun <-
     function(xlim, tick.number = 5,
              at = NULL,
              labels = NULL,
@@ -85,7 +87,7 @@ qxaxis <-
 }
 
 
-qyaxis <-
+qyaxisPaintFun <-
     function(ylim, tick.number = 5,
              at = NULL,
              labels = NULL,

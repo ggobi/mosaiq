@@ -29,3 +29,11 @@ compute.position <-
 }
 
 
+getLimits <- function(r)
+{
+    e <- as.matrix(r)
+    list(xlim = e[, 1], ylim = e[, 2])
+}
+
+
+

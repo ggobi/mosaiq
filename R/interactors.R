@@ -8,6 +8,7 @@ mosaiq.zoom <- function(which.packet,
                         shared.env,
                         event)
 {
+    .GlobalEnv$last.event <- event
     ## print(event$delta)
     zoomx <- event$modifiers["shift"]
     zoomy <- event$modifiers["control"]

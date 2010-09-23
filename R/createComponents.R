@@ -55,13 +55,12 @@ create.panels.new <-
                                  panel.layer <-
                                      qlayer(panel.toplayer, paintFun = paintFun,
                                             limits = qrect(limits[[i]]$xlim,
-                                                           limits[[i]]$ylim))
+                                                           limits[[i]]$ylim),
+                                            clip = TRUE)
                                  registerLayerEnv(shared.env, environment())
                              })
                    })
-                box.layer <-
-                    qlayer(panel.toplayer,
-                           paintFun = boxPaintFun())
+                box.layer <- qlayer(panel.toplayer, paintFun = boxPaintFun(), clip = FALSE)
                 ## zoom in/out with mouse wheel
 
                 wheel.fun <- mosaiq.zoom
@@ -115,8 +114,7 @@ create.panels.old <-
                              paintFun <- function(item, painter, exposed)
                              {
                                  ## message("i is ", i)
-                                 e <- as.matrix(exposed)
-                                 cl <- list(xlim = e[, 1], ylim = e[, 2])
+                                 cl <- getLimits(exposed)
                                  const <- 0
                                  panel.fun(panel.vars = panel.vars,
                                            packet = packets[[i]],
@@ -208,37 +206,30 @@ create.axis <-
                           switch(side,
                                  top = ,
                                  bottom = function(item, painter, exposed) {
-                                     str(limits[[i]])
-                                     ## str(list(exposed[, 1], side, limits[[i]]$xat))
-                                     e <- as.matrix(exposed)
-                                     qxaxis(e[, 1],  #limits[[i]]$xlim,
-                                            side = side,
-                                            at = limits[[i]]$xat,
-                                            labels = limits[[i]]$xlabels,
-                                            font = font,
-                                            item = item, painter = painter, exposed = exposed)
+                                     qxaxisPaintFun(getLimits(exposed)$xlim,
+                                                    side = side,
+                                                    at = limits[[i]]$xat,
+                                                    labels = limits[[i]]$xlabels,
+                                                    font = font,
+                                                    item = item, painter = painter, exposed = exposed)
                                  },
                                  left = ,
                                  right = function(item, painter, exposed) {
-                                     str(limits[[i]])
-                                     e <- as.matrix(exposed)
-                                     qyaxis(e[, 2],  #limits[[i]]$ylim,
-                                            side = side,
-                                            at = limits[[i]]$yat,
-                                            labels = limits[[i]]$ylabels,
-                                            font = font,
-                                            item = item, painter = painter, exposed = exposed)
+                                     qyaxisPaintFun(getLimits(exposed)$ylim,
+                                                    side = side,
+                                                    at = limits[[i]]$yat,
+                                                    labels = limits[[i]]$ylabels,
+                                                    font = font,
+                                                    item = item, painter = painter, exposed = exposed)
                                  })
-
-
-                      limits <-
-                        switch(side,
-                               top = qrect(limits[[i]]$xlim, c(-0.3, 1)),
-                               bottom = qrect(limits[[i]]$xlim, c(0, 1.3)),
-                               left = ,
-                               right = qrect(c(0, 1), limits[[i]]$ylim))
+                      layer.limits <-
+                          switch(side,
+                                 top = qrect(limits[[i]]$xlim, c(-0.3, 1)),
+                                 bottom = qrect(limits[[i]]$xlim, c(0, 1.3)),
+                                 left = ,
+                                 right = qrect(c(0, 1), limits[[i]]$ylim))
                       axis.layer <- qlayer(NULL, paintFun = paintFun,
-                                           limits = limits)
+                                           limits = layer.limits)
                       axis.layer$minimumSize <- qsize(20, 20)
                       registerLayerEnv(shared.env, environment())
                       axis.layer

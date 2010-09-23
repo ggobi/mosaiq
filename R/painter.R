@@ -61,8 +61,7 @@ mosaiq.abline <-
              ...,
              item, painter, exposed)
 {
-    e <- as.matrix(exposed)
-    cl <- list(xlim = e[, 1], ylim = e[, 2])
+    cl <- getLimits(exposed)
     if (!is.null(h) || !is.null(v))
     {
         h <- unique(h)
@@ -177,8 +176,7 @@ mosaiq.grid <-
     function(h = 3, v = 3, col = "grey", ...,
              item, painter, exposed)
 {
-    e <- as.matrix(exposed)
-    cl <- list(xlim = e[, 1], ylim = e[, 2])
+    cl <- getLimits(exposed)
     h <- h[1]; v <- v[1]
     if (h < 0)
         mosaiq.abline(h = pretty(cl$ylim, n = -h),
@@ -266,8 +264,7 @@ mosaiq.bars <-
     nvals <- length(vals)
     col <- rep(col, length = nvals)
     fill <- rep(fill, length = nvals)
-    e <- as.matrix(exposed)
-    cpl <- list(xlim = e[, 1], ylim = e[, 2])
+    cpl <- getLimits(exposed)
     origin <-
         if (stack) 0
         else if (horizontal)
@@ -404,9 +401,7 @@ mosaiq.fill <-
     function(col = "grey", border = "black", ...,
              item, painter, exposed)
 {
-    e <- as.matrix(exposed)
-    cl <- list(xlim = e[, 1],
-               ylim = e[, 2])
+    cl <- getLimits(exposed)
     mosaiq.rect(cl$xlim[1], cl$ylim[1],
                 cl$xlim[2], cl$ylim[2],
                 col = border, fill = col,

@@ -11,6 +11,9 @@ mydata <-
                g = gl(3, 1, N, labels = month.name[1:3]),
                a = gl(1, N))
 
+
+m <- mosaiq.xyplot(y ~ x, data = mydata)
+
 mosaiq.xyplot(y ~ x, data = mydata,
               margin = ~g,
               ##layout = c(1, 1),

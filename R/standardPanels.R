@@ -157,8 +157,7 @@ mosaiq.superpose <-
 panel.mosaiq.xyplot <-
     function(panel.vars = list(x = NULL, y = NULL, groups = NULL),
              which.packet, packets,
-             data,
-             enclos,
+             data, enclos,
              give.limits = FALSE,
              type = "p", grid = FALSE,
              ...,
@@ -190,9 +189,10 @@ panel.mosaiq.xyplot <-
         xr <- limits$xlim
         yr <- limits$ylim
         id <- (x > min(xr) & x < max(xr) &
-              y > min(yr) & y < max(yr))
+               y > min(yr) & y < max(yr))
         ## id <- TRUE
-        mosaiq.superpose(x = x[id], y = y[id], groups = groups[id],
+        mosaiq.superpose(x = x[id], y = y[id],
+                         groups = groups[id],
                          panel.groups = panel.groups,
                          type = type, 
                          horizontal = horizontal, ...)
@@ -388,12 +388,11 @@ panel.mosaiq.dotplot <-
              horizontal = TRUE,
              shared.env)
 {
+    packet <- packets[[which.packet]]
     col.ref <- theme$dot.line$col
-    if (give.limits)
-        return(prepanel.mosaiq.xyplot(panel.vars = panel.vars, packet = packet,
-                                      data = data, enclos = enclos, ...))
     x <- evaluate(panel.vars$x, data = data, subset = packet, enclos = enclos)
     y <- evaluate(panel.vars$y, data = data, subset = packet, enclos = enclos)
+    if (give.limits) return(default.limits(x, y))
     if (missing(horizontal)) 
     {
         horizontal <- if (is.factor(x)) FALSE else TRUE
@@ -402,12 +401,21 @@ panel.mosaiq.dotplot <-
         mosaiq.abline(h = unique(as.numeric(y)), col = col.ref, ...)
     else 
         mosaiq.abline(v = unique(as.numeric(x)), col = col.ref, ...)
-    panel.mosaiq.xyplot(panel.vars = panel.vars, packet = packet,
+    panel.mosaiq.xyplot(panel.vars = panel.vars,
+                        which.packet = which.packet, packets = packets,
                         data = data, enclos = enclos,
                         give.limits = FALSE,
                         horizontal = horizontal, ...,
+                        shared.env = shared.env,
                         theme = theme, col = col, fill = fill)
 }
+
+
+
+
+
+
+
 
 prepanel.mosaiq.dotplot <- function(..., give.limits)
     panel.mosaiq.dotplot(..., give.limits = TRUE)
@@ -590,13 +598,15 @@ prepanel.mosaiq.bwplot <- function(..., give.limits)
 
 panel.mosaiq.barchart <-
     function(panel.vars = list(x = NULL, y = NULL, groups = NULL),
-             packet, data, enclos,
+             which.packet, packets,
+             data, enclos,
              give.limits = FALSE,
              stack = TRUE,
              origin = 0,
              ...,
              horizontal = TRUE)
 {
+    packet <- packets[[which.packet]]
     x <- evaluate(panel.vars$x, data = data, subset = packet, enclos = enclos)
     y <- evaluate(panel.vars$y, data = data, subset = packet, enclos = enclos)
     if (missing(horizontal)) 
@@ -634,11 +644,8 @@ panel.mosaiq.barchart <-
 }
 
 
-
-
 prepanel.mosaiq.barchart <- function(..., give.limits)
     panel.mosaiq.barchart(..., give.limits = TRUE)
-
 
 
 ## maps
@@ -649,7 +656,8 @@ prepanel.mosaiq.mapplot <- function(..., give.limits)
 
 panel.mosaiq.mapplot <-
     function(panel.vars = list(x = NULL, y = NULL),
-             packet, data, enclos,
+             which.packet, packets,
+             data, enclos,
              map,
              give.limits = FALSE,
              cuts = 30, breaks,
@@ -657,6 +665,7 @@ panel.mosaiq.mapplot <-
              ...)
 {
     if (give.limits) return(default.limits(map$x, map$y))
+    packet <- packets[[which.packet]]
     x <- evaluate(panel.vars$x, data = data, subset = packet, enclos = enclos)
     y <- evaluate(panel.vars$y, data = data, subset = packet, enclos = enclos)
     names(x) <- as.character(y)

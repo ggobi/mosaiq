@@ -1,40 +1,62 @@
 
 ## some useful interaction functions
 
-mosaiq.zoom <- function(which.packet,
-                        packets,
-                        ...,
-                        zoom.relation = "same", 
-                        shared.env,
-                        event)
+mosaiq.zoom <-
+    function(which.packet, packets,
+             ...,
+             zoom.relation = "same", 
+             shared.env,
+             factor, xonly = TRUE, yonly = TRUE)
 {
-    .GlobalEnv$last.event <- event
-    ## print(event$delta)
-    zoomx <- event$modifiers["shift"]
-    zoomy <- event$modifiers["control"]
-    if (!zoomx && !zoomy) ## neither
-    {
-        zoomx <- zoomy <- TRUE ## do both
-    }
-    f <- -0.005 * event$delta / 120
+    if (!xonly && !yonly) ## neither
+        xonly <- yonly <- TRUE ## do both
     do.packets <-
-        if (zoom.relation == "same") seq_along(shared.env$limits)
+        if (zoom.relation == "same")
+            seq_along(shared.env$limits)
         else which.packet
     for (i in do.packets)
     {
-        if (zoomx)
+        if (xonly)
             shared.env$limits[[i]]$xlim <-
-                extendrange(shared.env$limits[[i]]$xlim, f = f)
-        if (zoomy)
+                extendrange(shared.env$limits[[i]]$xlim, f = factor)
+        if (yonly)
             shared.env$limits[[i]]$ylim <-
-                extendrange(shared.env$limits[[i]]$ylim, f = f)
+                extendrange(shared.env$limits[[i]]$ylim, f = factor)
     }
     if (is(shared.env$widget, "QWidget"))
     {
         updateLayerLimits(shared.env)
-        ## qupdate(shared.env$widget)
     }
 }
+
+mosaiq.pan <-
+    function(which.packet, packets,
+             ...,
+             zoom.relation = "same", 
+             shared.env,
+             delta, xonly = TRUE, yonly = TRUE)
+{
+    if (!xonly && !yonly) ## neither
+        xonly <- yonly <- TRUE ## do both
+    do.packets <-
+        if (zoom.relation == "same")
+            seq_along(shared.env$limits)
+        else which.packet
+    for (i in do.packets)
+    {
+        if (xonly)
+            shared.env$limits[[i]]$xlim <-
+                shared.env$limits[[i]]$xlim - delta[1]
+        if (yonly)
+            shared.env$limits[[i]]$ylim <-
+                shared.env$limits[[i]]$ylim - delta[2]
+    }
+    if (is(shared.env$widget, "QWidget"))
+    {
+        updateLayerLimits(shared.env)
+    }
+}
+
 
 registerLayerEnv <- function(env, layerenv)
 {
@@ -45,25 +67,29 @@ registerLayerEnv <- function(env, layerenv)
 updateLayerLimits <- function(env)
 {
     ## take all registered layer environments in env and update their
-    ## limits
+    ## limits.  This uses special knowledge of layer names used in
+    ## createComponents.R
 
     limits <- env$limits
     lapply(env$layer.envs,
-           function(x) {
-               if (!is.null(x$panel.layer))
-                   x$panel.layer$setLimits(qrect(limits[[x$i]]$xlim,
-                                                 limits[[x$i]]$ylim))
-               if (!is.null(x$axis.layer))
+           function(renv) {
+               if (!is.null(renv$panel.layer))
+                   renv$panel.layer$setLimits(qrect(limits[[renv$i]]$xlim,
+                                                    limits[[renv$i]]$ylim))
+               if (!is.null(renv$interaction.layer))
+                   renv$interaction.layer$setLimits(qrect(limits[[renv$i]]$xlim,
+                                                          limits[[renv$i]]$ylim))
+               if (!is.null(renv$axis.layer))
                {
-                   cl <- x$axis.layer$limits()
-                   x$axis.layer$setLimits(switch(x$side,
-                                                 top = ,
-                                                 bottom =
-                                                 qrect(limits[[x$i]]$xlim,
-                                                       cl[, 2]),
-                                                 left = ,
-                                                 right = qrect(cl[, 1],
-                                                   limits[[x$i]]$ylim)))
+                   cl <- getLimits(renv$axis.layer$limits())
+                   renv$axis.layer$setLimits(switch(renv$side,
+                                                    top = ,
+                                                    bottom =
+                                                    qrect(limits[[renv$i]]$xlim,
+                                                          cl$ylim),
+                                                    left = ,
+                                                    right = qrect(cl$xlim,
+                                                                  limits[[renv$i]]$ylim)))
                }
            })
 }

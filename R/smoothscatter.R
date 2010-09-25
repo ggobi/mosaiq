@@ -41,14 +41,6 @@ mosaiq.smoothScatter <-
              col = "black",
              range.x,
              ..., colramp, painter, panel.env)
-
-    ## If time permits, replacing the call to panel.levelplot by
-    ## panel.rect might make the code more transparent (which would
-    ## also make the subscripts thing unnecessary).  The only drawback
-    ## I can think of is that we will no longer get contourplots
-    ## instead of levelplots, but I don't think this is the right
-    ## place for that anyway.
-
 {
     ## print(ls.str(panel.env))
     if (!is.numeric(nrpoints) | (nrpoints < 0) | (length(nrpoints) != 1))
@@ -111,7 +103,7 @@ mosaiq.smoothScatter <-
                      painter = painter))
     if (!is.null(xpoints))
         mosaiq.points(xpoints,
-                      pch = qpathRect(-0.5, -0.5, 0.5, 0.5),
+                      pch = qglyphSquare(1),
                       cex = cex,
                       col = "black", fill = "black",
                       painter = painter)

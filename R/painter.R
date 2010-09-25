@@ -138,7 +138,7 @@ mosaiq.points <-
              pch = qglyphCircle(5),
              cex = 1, col = "black", fill = "transparent", ..., painter)
 {
-    qantialias(painter) <- FALSE ## FIXME: temporary
+    qantialias(painter) <- TRUE ## FIXME: temporary
     xy <- xy.coords(x, y, recycle = TRUE)
     x <- xy$x
     y <- xy$y
@@ -207,15 +207,11 @@ mosaiq.rect <-
     x <- xy$x
     y <- xy$y
     n <- length(x)
-    ## col <- rep(col, length = n)
-    ## fill <- rep(fill, length = n)
-    rgb.col <- col2rgb(col, TRUE)
-    rgb.fill <- col2rgb(fill, TRUE)
     qdrawRect(painter,
               x - width/2, y - height/2, 
               x + width/2, y + height/2, 
-              stroke = rgb.col,
-              fill = rgb.fill)
+              stroke = col,
+              fill = fill)
 }
 
 mosaiq.polygon <-

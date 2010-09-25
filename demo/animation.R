@@ -6,10 +6,11 @@ library(qtpaint)
 library(mosaiq)
 
 
-pendulum <- function(col = "red", bg = "black", incr = 5,
-                   n = 100, opengl = TRUE, verbose = getOption("verbose"))
+pendulum <-
+    function(col = "red", bg = "black", incr = 5,
+             n = 100, opengl = FALSE,
+             verbose = getOption("verbose"))
 {
-    rgb.col <- col2rgb(col, TRUE)
     edata <- new.env(parent = emptyenv())
 
     restart <- function()
@@ -46,39 +47,38 @@ pendulum <- function(col = "red", bg = "black", incr = 5,
     }
     
     render_axes  <- function(item, painter, exposed) {
+        print("drawing grid")
         mosaiq.grid(item = item, painter = painter, exposed = exposed)
     }
 
-    ## Create canvas for displaying tour
-    scene <- qgraphicsScene()
-    root <- qlayer(scene)
+    ## Create canvas
+    scene <- qscene()
+    root <- qlayer(scene, cache = TRUE)
 
-    axes <- qlayer(root, render_axes)
-    points <- qlayer(root, render_data)
-    qcacheMode(points) <- "none"
-    qcacheMode(axes) <- "none"
-    qlimits(points) <- qrect(c(-1, 1), c(-1, 1))
-    qlimits(axes) <- qrect(c(-1, 1), c(-1, 1))
-    
+    axes <- qlayer(root, render_axes, cache = TRUE, limits = qrect(c(-1, 1), c(-1, 1)))
+    points <- qlayer(root, render_data, cache = TRUE, limits = qrect(c(-1, 1), c(-1, 1)))
     view <- qplotView(scene = scene, opengl = opengl)
-    qsetContextMenuPolicy(view, "actions")
-    qsetDeleteOnClose(view, TRUE)
+    view$setContextMenuPolicy(Qt$Qt$ActionsContextMenu)
+    view$setAttribute(Qt$Qt$WA_DeleteOnClose, TRUE)
 
     ## start/stop animation
     timer <- qtimer(100, step)
-    pauseAct <- qaction(desc = "Pause", shortcut = "Ctrl+P", checkable = TRUE)
+    pauseAct <- Qt$QAction("Pause", view)
+    pauseAct$setCheckable(TRUE)
+    pauseAct$setShortcut(Qt$QKeySequence("Ctrl+P"))
     qconnect(pauseAct, signal = "triggered", 
              handler = function() {
-                 if (pauseAct$checked) timer$stop() else timer$start()
+                 if (pauseAct$isChecked()) timer$stop() else timer$start()
              })
-    qaddAction(view, pauseAct)
+    view$addAction(pauseAct)
 
     ## random restart
     timer <- qtimer(30, step)
-    restartAct <- qaction(desc = "Restart", shortcut = "Ctrl+R")
+    restartAct <- Qt$QAction("Restart", view)
+    restartAct$setShortcut(Qt$QKeySequence("Ctrl+R"))
     qconnect(restartAct, signal = "triggered", 
              handler = restart)
-    qaddAction(view, restartAct)
+    view$addAction(restartAct)
 
     ## stop timer on close
     qconnect(view, signal = "destroyed", 

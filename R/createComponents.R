@@ -13,7 +13,7 @@ boxPaintFun <- function(col = "black", fill = "transparent",...)
 
 
 
-create.panels.new <-
+create.panels <-
     function(layout, packets, panel, shared.env, ...)
 {
     limits <- shared.env$limits
@@ -39,10 +39,6 @@ create.panels.new <-
                                  panel.env <- environment() # can be used as panel-specific storage space by panel function
                                  paintFun <- function(item, painter, exposed)
                                  {
-##                                      limits <- shared.env$limits
-##                                      qlimits(item) <-
-##                                          qrect(limits[[i]]$xlim, ## 
-##                                                limits[[i]]$ylim)
                                      panel.fun(which.packet = i,
                                                packets = packets,
                                                ...,
@@ -56,26 +52,48 @@ create.panels.new <-
                                      qlayer(panel.toplayer, paintFun = paintFun,
                                             limits = qrect(limits[[i]]$xlim,
                                                            limits[[i]]$ylim),
+                                            cache = FALSE,
                                             clip = TRUE)
                                  registerLayerEnv(shared.env, environment())
+                                 panel.layer
                              })
                    })
                 box.layer <- qlayer(panel.toplayer, paintFun = boxPaintFun(), clip = FALSE)
-                ## zoom in/out with mouse wheel
 
-                wheel.fun <- mosaiq.zoom
+                ## An "interaction" layer
+
                 local(
                   {
                       i <- i # make local copy, used on repaint
-                      wheelFun <- function(event)
+                      wheelFun <- function(layer, event)
                       {
-                          wheel.fun(which.packet = i,
-                                    packet = packets,
-                                    ...,
-                                    shared.env = shared.env,
-                                    event = event)
+                          factor <- -0.005 * event$delta() / 120
+                          xonly <- (event$modifiers() == Qt$Qt$ShiftModifier)
+                          yonly <- (event$modifiers() == Qt$Qt$ControlModifier)
+                          mosaiq.zoom(which.packet = i, packet = packets,
+                                      ...,
+                                      shared.env = shared.env,
+                                      factor = factor,
+                                      xonly = xonly, yonly = yonly)
                       }
-                      panel.layer <- qlayer(panel.toplayer, wheelFun = wheelFun)
+                      mouseMoveFun <- function(layer, event)
+                      {
+                          delta <- as.numeric(event$pos()) - as.numeric(event$lastPos())
+                          xonly <- (event$modifiers() == Qt$Qt$ShiftModifier)
+                          yonly <- (event$modifiers() == Qt$Qt$ControlModifier)
+                          mosaiq.pan(which.packet = i, packet = packets,
+                                     ...,
+                                     shared.env = shared.env,
+                                     delta = delta,
+                                     xonly = xonly, yonly = yonly)
+                      }
+                      interaction.layer <- qlayer(panel.toplayer,
+                                                  limits = qrect(limits[[i]]$xlim,
+                                                                 limits[[i]]$ylim),
+                                                  wheelFun = wheelFun,
+                                                  mouseMoveFun = mouseMoveFun)
+                      registerLayerEnv(shared.env, environment())
+                      interaction.layer
                   })
                 
                 ## return container layer (to be placed in a layout)
@@ -85,66 +103,6 @@ create.panels.new <-
     }
     ans
 }
-
-create.panels.old <-
-    function(layout,
-             packets, 
-             panel.vars, panel,
-             data = .GlobalEnv,
-             enclos = .GlobalEnv,
-             shared.env, ...)
-{
-    limits <- shared.env$limits
-    ans <- array(list(NULL), dim = dim(layout))
-    for (p in seq_len(length(ans)))
-    {
-        i <- layout[p]
-        if (i > 0)
-        {
-            ans[[p]] <-
-            {
-                if (!is.list(panel)) panel <- list(panel)
-                lapply(panel,
-                       function(panel.fun)
-                   {
-                       local(
-                         {
-                             i <- i # make local copy, used on repaint
-                             panel.env <- environment()
-                             paintFun <- function(item, painter, exposed)
-                             {
-                                 ## message("i is ", i)
-                                 cl <- getLimits(exposed)
-                                 const <- 0
-                                 panel.fun(panel.vars = panel.vars,
-                                           packet = packets[[i]],
-                                           limits = limits[[i]],
-                                           data = data,
-                                           enclos = enclos, ...,
-                                           item = item,
-                                           painter = painter,
-                                           exposed = exposed,
-                                           panel.env = panel.env)
-                                 ## mosaiq.rect(cl$xlim[1]+const, cl$ylim[1]+const,
-                                 ##             cl$xlim[2]-const, cl$ylim[2]-const, 
-                                 ##             col = "black", fill = "transparent", painter = painter)
-                             }
-                             panel.layer <- qlayer(NULL, paintFun = paintFun)
-                             qlimits(panel.layer) <-
-                                 qrect(limits[[i]]$xlim, limits[[i]]$ylim)
-                             qcacheMode(panel.layer) <- "none"
-                             ## qminimumSize(panel.layer) <- qsize(20, 20)
-                             #FIXME panel.layer$setMinimumSize(qsize(20, 20))
-                             panel.layer
-                         })
-                   })
-            }
-        }
-    }
-    ans
-}
-
-create.panels <- create.panels.new
 
 
 create.strip.top <-

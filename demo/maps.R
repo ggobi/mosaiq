@@ -18,8 +18,6 @@ mosaiq.mapplot(x = density,
                map = state.map)
 
 
-
-
 data(USCancerRates, package = "latticeExtra")
 
 tmpdata <-
@@ -43,5 +41,6 @@ mosaiq.mapplot(x = log(rate),
                colramp = terrain.colors,
                layout = c(1, 1),
                map = map("county", plot = FALSE, fill = TRUE))
+
 
 

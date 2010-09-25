@@ -4,21 +4,20 @@ library(mosaiq)
 
 ## export.mosaiq("fig/mosaiq_%03g.png")
 
-N <- 10000
+N <- 1000
 
 mydata <-
     data.frame(x = 1:N, y = rnorm(N),
                g = gl(3, 1, N, labels = month.name[1:3]),
                a = gl(1, N))
 
+(m <- mosaiq.xyplot(y ~ x, data = mydata))
 
-m <- mosaiq.xyplot(y ~ x, data = mydata)
+mosaiq.xyplot(y ~ x, data = mydata, margin = ~g, grid = TRUE)
+mosaiq.xyplot(y ~ x, data = mydata, margin = ~g, grid = TRUE, zoom.relation = "free")
 
-mosaiq.xyplot(y ~ x, data = mydata,
-              margin = ~g,
-              ##layout = c(1, 1),
-              ## groups = g,
-              grid = TRUE)
+
+
 
 myplot <-
     mosaiq.xyplot(y ~ x, data = mydata, groups = g,
@@ -39,6 +38,9 @@ mosaiq.qqmath(y, data = mydata, groups = g, margin = ~a)
 
 library("latticeExtra")
 data(gvhd10)
+
+mosaiq.xyplot(x, y, data = list(x = rnorm(1000), y = rnorm(1000)), 
+              panel.groups = mosaiq.smoothScatter)
 
 mosaiq.xyplot(SSC.H ~ FSC.H, data = gvhd10, margin = ~Days,
               panel.groups = mosaiq.smoothScatter)
@@ -71,11 +73,10 @@ mosaiq.xyplot(yield ~ nitro, data = Oats,
               layout = c(3, 2),
               main = "Yield of Oats")
 
-
 data(barley, package = "lattice")
 
 mosaiq.dotplot(yield, variety, data = barley, groups = year, margin = ~ site,
-               layout = c(1, 6), aspect = c(0.7), grid = FALSE)
+               layout = c(1, 6), aspect = c(0.7), cex = 0.7)
 
 mosaiq.xyplot(yield, variety, data = barley, jitter.y = TRUE)
 
@@ -89,9 +90,6 @@ data(gvhd10)
 
 mosaiq.xyplot(SSC.H ~ FSC.H, data = gvhd10, margin = ~Days,
               panel.groups = mosaiq.smoothScatter)
-
-
-
 
 mosaiq.densityplot(log(FSC.H), data = gvhd10, margin = ~Days, layout = c(2, 4))
 

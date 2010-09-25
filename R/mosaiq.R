@@ -328,7 +328,8 @@ mosaiq.dotplot <-
     function(x, y = NULL, data, enclos, groups = NULL, 
              legend = auto.legend("points", panel.vars, data = data, enclos = enclos, legend.args = legend.args),
              legend.args = list(),
-             panel = panel.mosaiq.dotplot, prepanel = prepanel.mosaiq.dotplot, ...)
+             panel = panel.mosaiq.dotplot, prepanel = prepanel.mosaiq.dotplot,
+             ...)
 {
     panel.vars <- panel.terms(list(x = substitute(x), y = substitute(y), groups = substitute(groups)))
     if (missing(data)) data <- parent.frame()
@@ -371,8 +372,5 @@ mosaiq.mapplot <-
     panel.vars <- panel.terms(list(x = substitute(x), y = substitute(y)))
     if (missing(data)) data <- parent.frame()
     if (missing(enclos)) enclos <- parent.frame()
-    mosaiq(data = data, enclos = enclos,
-           panel.vars = panel.vars,
-           panel = panel,
-           prepanel = prepanel, ...)
+    mosaiq(data = data, enclos = enclos, panel.vars = panel.vars, panel = panel, prepanel = prepanel, ...)
 }

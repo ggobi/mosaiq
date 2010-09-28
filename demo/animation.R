@@ -73,7 +73,7 @@ pendulum <-
     view$addAction(pauseAct)
 
     ## random restart
-    timer <- qtimer(30, step)
+    ## timer <- qtimer(30, step)
     restartAct <- Qt$QAction("Restart", view)
     restartAct$setShortcut(Qt$QKeySequence("Ctrl+R"))
     qconnect(restartAct, signal = "triggered", 
